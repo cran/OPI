@@ -30,6 +30,10 @@ and returns an OPI datatype ready for passing to opiPresent
 Extra parameters to pass to the opiPresent function
 }
 }
+\details{
+    Note this function will repeatedly call \code{opiPresent} for a stimulus 
+    until \code{opiPresent} returns \code{NULL} (ie no error occured).
+}
 \value{
 Returns a list containing
 \item{npres}{Total number of presentations}
@@ -38,6 +42,11 @@ Returns a list containing
 \item{final}{Final threshold estimate in dB}
 }
 \references{
+Please cite:
+A. Turpin, P.H. Artes and A.M. McKendrick
+"The Open Perimetry Interface: An enabling tool for clinical visual psychophysics",
+Journal of Vision 12(11) 2012.
+
 http://perimetry.org/OPI
 }
 \author{
@@ -59,7 +68,7 @@ makeStim <- function(db, n) {
     return(s)
 }
 chooseOpi("SimHenson")
-if (!is.null(opiInitialize("C", 6)))
+if (!is.null(opiInitialize(type="C", cap=6)))
     stop("opiInitialize failed")
 
 result <- FT(makeStim=makeStim, tt=30, fpr=0.15, fnr=0.01)

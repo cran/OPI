@@ -32,9 +32,27 @@ The list should contain the following elements.
 
 \item\code{...} machine specific parameters 
 }
+
+\subsection{Octopus 900}{
+    \code{x} and \code{y} are in degrees, with precision to three decimal places recognised.
+
+    \code{image} is not possible on an Octopus 900.
+
+    \code{levels} are in cd/\eqn{\mbox{m}^2}{m^2}, and are rounded to the 
+                nearest one tenth of a dB for display.
+
+    \code{colors} are ignored. Use \code{opiSetBackground()} to alter stimulus color.
+
+    \code{sizes} are in degrees, but are round to the nearest Goldmann Size I..V for display.
+}
 }
 
 \references{
+Please cite:
+A. Turpin, P.H. Artes and A.M. McKendrick
+"The Open Perimetry Interface: An enabling tool for clinical visual psychophysics",
+Journal of Vision 12(11) 2012.
+
 http://perimetry.org/OPI
 }
 

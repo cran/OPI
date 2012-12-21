@@ -9,34 +9,51 @@ Stimulus parameter list.
 }
 \details{ 
 \itemize{
-\item[\code{x}]     coordinate of the center of stimulus in degrees 
+\item\code{x}     coordinate of the center of stimulus in degrees 
            relative to fixation 
-\item[\code{y}]     coordinate of the center of stimulus in degrees 
+\item\code{y}     coordinate of the center of stimulus in degrees 
            relative to fixation 
-\item[\code{image}] an image to display in a machine specific format 
-\item[\code{lut}]   if \code{is.na(image)} then this is a lookup 
+\item\code{image} an image to display in a machine specific format 
+\item\code{lut}   if \code{is.na(image)} then this is a lookup 
            table (vector) for stimulus level at each step of 
            rate Hz in cd/\eqn{\mbox{m}^2}{m^2}. If image is 
            specified, then this is a list of images, in the 
            same format as image, that is stepped through at 
            rate Hz.
-\item[\code{size}]  diameter of target in degrees, or scaling factor for 
+\item\code{size}  diameter of target in degrees, or scaling factor for 
            image if specified 
-\item[\code{color}] machine specific stimulus color settings (ignored 
+\item\code{color} machine specific stimulus color settings (ignored 
            if \code{!is.na(image)}) 
-\item[\code{rate}]  frequency with which lut is processed in Hz 
-\item[\code{duration}]  total length of stimulus flash in milliseconds. 
+\item\code{rate}  frequency with which lut is processed in Hz 
+\item\code{duration}  total length of stimulus flash in milliseconds. 
                There is no guarantee that 
                \code{duration \%\% length(lut)/rate == 0}. 
                That is, the onus is on the user to ensure the 
                duration is a multiple of the period of the stimuli. 
-\item[\code{responseWindow}] maximum time (>= 0) in milliseconds to wait for a 
+\item\code{responseWindow} maximum time (>= 0) in milliseconds to wait for a 
                     response from the onset of the stimulus presentation 
-\item[\code{...}] machine specific parameters 
+\item\code{...} machine specific parameters 
+}
+
+\subsection{Octopus 900}{
+    \code{x} and \code{y} are in degrees, with precision to one decimal place recognised.
+
+    \code{image} is not possible on an Octopus 900.
+
+    \code{lut} is not possible on an Octopus 900. Stimulus is at 0 dB.
+
+    \code{rate} is in Hz, with precision to one decimal place recognised.
+
+    \code{color} is ignored. Use \code{opiSetBackground()} to alter stimulus color.
 }
 }
 
 \references{
+Please cite:
+A. Turpin, P.H. Artes and A.M. McKendrick
+"The Open Perimetry Interface: An enabling tool for clinical visual psychophysics",
+Journal of Vision 12(11) 2012.
+
 http://perimetry.org/OPI
 }
 

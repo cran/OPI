@@ -15,8 +15,8 @@ opiPresent(stim, nextStim=NULL, ...)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{stim}{
-    A list of class \code{opiStaticStimulus}, \code{opiKineticStimulus}, or
-        \code{opiTemporalStimulus}. 
+    A list of class \code{\link{opiStaticStimulus}}, \code{\link{opiKineticStimulus}}, or
+        \code{\link{opiTemporalStimulus}}. 
   }
   \item{nextStim}{
     As for \code{stim}, but the next presentation to be made. 
@@ -30,7 +30,7 @@ opiPresent(stim, nextStim=NULL, ...)
   }
 }
 \details{
-\code{opiPresent} 
+\code{\link{opiPresent}}
 is blocking in that it will not return until either a response
 is obtained, or at least the responseWindow milliseconds has expired. (Note
 that more time might have expired.) Specifying \code{nextStim} 
@@ -40,8 +40,12 @@ response to \code{stim} to make preparations
 for the next stimuli. (For example retargeting the projector or moving
 aperture and/or filter wheels.) 
 There is no guarantee that the next call to
-\code{opiPresent} will have \code{nextStim} as the first argument; this 
+\code{\link{opiPresent}} will have \code{nextStim} as the first argument; this 
 should be checked by the machine specific implementations.
+
+Also note that to allow for different parameters depending on the 
+implementation chosen with \code{chooseOpi}, every parameter MUST
+be named in a call to \code{\link{opiPresent}}.
 
 \subsection{SimHenson}{
 
@@ -67,11 +71,29 @@ determined by \code{simH.type} which is also set in the call to
 \code{opiPresent(stim, nextStim=NULL, fpr=0.03, fnr=0.01, tt=30)}
 
 If the chosen OPI implementation is \code{SimGaussian}, then
-the response to a stimuli as determined by sampling from a
+the response to a stimuli is determined by sampling from a
 Frequency-of-Seeing (FoS) curve (also known as the psychometric
 function) with formula \code{fpr+(1-fpr-fnr)*(1-pnorm(x, tt, simG.global.sd))},
 where \code{x} is the stimulus value in Humphrey dB, and \code{simG.global.sd} is
 set with \code{opiInitialize}.
+}
+
+\subsection{SimYes}{
+
+\code{opiPresent(stim, nextStim=NULL)}
+
+If the chosen OPI implementation is \code{SimYes}, then
+the response to a stimuli is always yes, hence \code{\link{opiPresent}} always returns 
+\code{err=NULL}, \code{seen=TRUE}, and \code{time=0}.
+}
+
+\subsection{SimNo}{
+
+\code{opiPresent(stim, nextStim=NULL)}
+
+If the chosen OPI implementation is \code{SimNo}, then
+the response to a stimuli is always no, hence \code{\link{opiPresent}} always returns 
+\code{err=NULL}, \code{seen=FALSE}, and \code{time=0}.
 }
 
 }
@@ -91,8 +113,18 @@ until the response from the subject if \code{seen} is \code{TRUE}.
 If \code{seen} is \code{FALSE}, this
 value is undefined.
 }
+\item{frames}{Only returned for Octopus 900. A 2D byte array of pixels for an image that is 320 wide. 
+See the parameter \code{gazeFeed} for \code{\link{opiInitialize}} to control what frames are returned.
+}
+\item{numFrames}{Only returned for Octopus 900. The number of frames in \code{frames}.
+}
 }
 \references{
+Please cite:
+A. Turpin, P.H. Artes and A.M. McKendrick
+"The Open Perimetry Interface: An enabling tool for clinical visual psychophysics",
+Journal of Vision 12(11) 2012.
+
 http://perimetry.org/OPI
 
 David B. Henson, Shaila Chaudry, Paul H. Artes, E. Brian Faragher, and
@@ -122,10 +154,13 @@ makeStim <- function(db, n) {
     return(s)
 }
 chooseOpi("SimHenson")
-if (!is.null(opiInitialize("C", 6)))
+if (!is.null(opiInitialize(type="C", cap=6)))
     stop("opiInitialize failed")
 
 result <- opiPresent(stim=makeStim(10,0), tt=30, fpr=0.15, fnr=0.01)
+
+    # Will not work as 'stim' is not named
+#result <- opiPresent(makeStim(10,0), tt=30, fpr=0.15, fnr=0.01)
 
 if (!is.null(opiClose()))
     warning("opiClose() failed")

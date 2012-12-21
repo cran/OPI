@@ -37,59 +37,33 @@
 require(rJava)
 
 ###################################################################
-# opi.global.octopusObject is the java Opi object set in opiInitialize
+# .Octopus900Env$octopusObject is the java Opi object set in opiInitialize
+# .Octopus900Env$... are lots of colors and Fixation constants set in setupBackgroundConstants()
 ###################################################################
-assign("opi.global.octopusObject", NULL, envir = .GlobalEnv)
-
-# constants that get set from EyeSuite classes
-# in setupBackgroundConstants()
-# Here to avoid Note in R CMD check
-#opi.O900.FIX_CENTRE<-           NA
-#opi.O900.FIX_CROSS<-           NA
-#opi.O900.FIX_RING<-           NA
-#opi.O900.BG_OFF<-           NA
-#opi.O900.BG_1<-           NA
-#opi.O900.BG_10<-           NA
-#opi.O900.BG_100<-           NA
-#opi.O900.FIX_CENTER<-           NA
-#opi.O900.FIX_CENTRE<-           NA
-#opi.O900.STIM_WHITE<-           NA
-#opi.O900.STIM_BLUE<-           NA
-#opi.O900.STIM_RED<-           NA
-#opi.O900.BG_WHITE<-           NA
-#opi.O900.BG_YELLOW<-           NA
-#opi.O900.MET_COL_WW<-           NA
-#opi.O900.MET_COL_BY<-           NA
-#opi.O900.MET_COL_RW<-           NA
-#opi.O900.MET_COL_BLUE_WHITE<-   NA
-#opi.O900.MET_COL_RED_YELLOW<-   NA
-#opi.O900.MET_COL_WHITE_YELLOW<- NA
-#opi.O900.MET_COL_USER<-         NA
-#opi.O900.MET_COL_BW<-           NA
-#opi.O900.MET_COL_RY<-           NA
-#opi.O900.MET_COL_WY<-           NA
+if (!exists(".Octopus900Env"))
+    .Octopus900Env <- new.env()
 
 ###########################################################################
 # Get values for fixation, color and bg intensity constants
 # from EyeSuite classes, and set globals
-#       opi.O900.* 
+#       .Octopus900Env$* 
 # to the values of those constants.
 # INPUT: None.
 # OUTPUT: None.
-# SIDE EFFECTS: sets opi.O900.* if possible.
+# SIDE EFFECTS: sets .Octopus900Env$* if possible.
 ###########################################################################
 setupBackgroundConstants <- function() {
     f <- .jfields("com.hs.eyesuite.ext.extperimetryviewer.peristatic.data.exam.Const")
 
         #
         # check if cName exists as a field in f. If so, set 
-        # opi.O900.cName <- class value for cName
+        # .Octopus900Env$cName <- class value for cName
         #
     getC <- function(cName) {
         if (length(grep(cName, f)) > 0) 
-            assign(paste("opi.O900.",cName,sep=""),
+            assign(cName,
                    .jfield("com.hs.eyesuite.ext.extperimetryviewer.peristatic.data.exam.Const",NULL,cName), 
-                   envir = .GlobalEnv)
+                   envir = .Octopus900Env)
     }
 
     getC("FIX_CENTRE")
@@ -100,19 +74,19 @@ setupBackgroundConstants <- function() {
     getC("BG_10")       # 10 cd/m2 == 1000
     getC("BG_100")      # 100 cd/m2 == 10000
 
-    assign("opi.O900.FIX_CENTER", opi.O900.FIX_CENTRE, envir = .GlobalEnv)
+    assign("FIX_CENTER", .Octopus900Env$FIX_CENTRE, envir = .Octopus900Env) # help Americans
 
     f <- .jfields("com.hs.eyesuite.ext.extperimetry.octo900.ifocto.remote.OCTO900")
 
         #
         # check if cName exists as a field in f. If so, set 
-        # opi.O900.cName <- class value for cName
+        # .Octopus900Env$cName <- class value for cName
         #
     getC <- function(cName) {
         if (length(grep(cName, f)) > 0) 
-            assign(paste("opi.O900.",cName,sep=""),
+            assign(cName,
                    .jfield("com.hs.eyesuite.ext.extperimetry.octo900.ifocto.remote.OCTO900",NULL,cName), 
-                   envir = .GlobalEnv)
+                   envir = .Octopus900Env)
     }
 
         # get the color fields from OCTO900
@@ -129,22 +103,23 @@ setupBackgroundConstants <- function() {
     getC("MET_COL_WHITE_YELLOW")
     getC("MET_COL_USER")
 
-    assign("opi.O900.MET_COL_BW", opi.O900.MET_COL_BLUE_WHITE, envir = .GlobalEnv)
-    assign("opi.O900.MET_COL_RY", opi.O900.MET_COL_RED_YELLOW, envir = .GlobalEnv)
-    assign("opi.O900.MET_COL_WY", opi.O900.MET_COL_WHITE_YELLOW, envir = .GlobalEnv)
+    assign("MET_COL_BW", .Octopus900Env$MET_COL_BLUE_WHITE,   envir = .Octopus900Env)
+    assign("MET_COL_RY", .Octopus900Env$MET_COL_RED_YELLOW,   envir = .Octopus900Env)
+    assign("MET_COL_WY", .Octopus900Env$MET_COL_WHITE_YELLOW, envir = .Octopus900Env)
 }
 
 
 ###################################################################
 # Goldmann target sizes in degrees
 ###################################################################
-GOLDMAN <- c(6.5, 13, 26, 52, 104) / 60
+GOLDMANN <- c(6.5, 13, 26, 52, 104) / 60
 
 #######################################################################
 # INPUT: 
 #   eyeSuiteJarLocation      = dir name containing EyeSuite Jar files
 #   eyeSuiteSettingsLocation = dir name containing EyeSuite settings
-#   eye                 = "right" or "left"
+#   eye                      = "right" or "left"
+#   gazeFeed                 = 0 (none), 1 (single frame), 2 (all frames with *)
 #
 #   Both input dirs should INCLUDE THE TRAILING SLASH.
 #
@@ -153,7 +128,7 @@ GOLDMAN <- c(6.5, 13, 26, 52, 104) / 60
 # @return 2 if failed to make ready
 #
 #######################################################################
-octo900.opiInitialize <- function(eyeSuiteJarLocation=NA, eyeSuiteSettingsLocation=NA, eye=NA) {
+octo900.opiInitialize <- function(eyeSuiteJarLocation=NA, eyeSuiteSettingsLocation=NA, eye=NA, gazeFeed=0) {
     if (is.na(eyeSuiteJarLocation))
         stop("You must specify the EyeSuite jar file folder in your call to opiInitialize")
     if (is.na(eyeSuiteSettingsLocation))
@@ -163,23 +138,27 @@ octo900.opiInitialize <- function(eyeSuiteJarLocation=NA, eyeSuiteSettingsLocati
     if (eye != "left" && eye != "right")
         stop("The eye argument of opiInitialize must be 'left' or 'right'")
 
-    .jinit(c(
-	    paste(eyeSuiteJarLocation, "HSEyeSuiteBasic.jar", sep=""),
-	    paste(eyeSuiteJarLocation, "HSEyeSuiteExtPerimetryViewer.jar", sep=""),
-	    paste(eyeSuiteJarLocation, "HSEyeSuiteExtPerimetry.jar", sep=""),
-        paste(.Library,"OPIOctopus900","jgoodies-binding-2.5.0.jar", sep="/"),
-        paste(.Library,"OPIOctopus900","jgoodies-common-1.2.1.jar", sep="/"),
-        paste(.Library,"OPIOctopus900","java", sep="/")
-    ))
+    #options("java.parameters"="-Xmx1024m -Xss64m")
+
+    hsJars <- dir(eyeSuiteJarLocation, pattern="*.jar", full.names=TRUE, recursive=TRUE)
+    .jinit(classpath=hsJars, 
+        params=getOption("java.parameters"),
+        "some random stuff",
+        force.init=TRUE
+    )
+
+    .jaddClassPath(paste(.Library,"OPIOctopus900","java", "opi.jar", sep="/"))
+    .jaddClassPath(paste(.Library,"OPIOctopus900","jgoodies-binding-2.5.0.jar", sep="/"))
+    .jaddClassPath(paste(.Library,"OPIOctopus900","jgoodies-common-1.2.1.jar", sep="/"))
 
     print(.jclassPath())    # just for debugging, not really needed
 
     setupBackgroundConstants()
 
         # the controling object
-    assign("opi.global.octopusObject", .jnew("opi.Opi", eyeSuiteSettingsLocation, eye), envir = .GlobalEnv)
+    assign("octopusObject", .jnew("opi.Opi", eyeSuiteSettingsLocation, eye), envir = .Octopus900Env)
 
-	err <- .jcall(.GlobalEnv$opi.global.octopusObject, "I", "opiInitialize")
+	err <- .jcall(.Octopus900Env$octopusObject, "I", "opiInitialize", as.double(gazeFeed))
 	if (err == 0)
 		return(NULL)
 	else
@@ -205,22 +184,72 @@ octo900.opiPresent.opiStaticStimulus <- function(stim, nextStim) {
         nextObj <- .jnull("opi/OpiStaticStimulus")
     } else {
         stimObj <- .jnew("opi/OpiStaticStimulus", stim$x*10.0, stim$y*10.0, cdTodb(stim$level)*10.0)
-        nextObj <- .jnew("opi/OpiStaticStimulus", nextStim$x*10.0, nextStim$y*10.0, 0) # level no matter
-	    .jcall(stimObj, "V", "setSize", as.double(which.min(abs(GOLDMAN - stim$size))))
+	    .jcall(stimObj, "V", "setSize", as.double(which.min(abs(GOLDMANN - stim$size))))
 	    .jcall(stimObj, "V", "setDuration", as.double(stim$duration))
 	    .jcall(stimObj, "V", "setResponseWindow", as.double(stim$responseWindow))
-	    .jcall(nextObj, "V", "setSize", as.double(which.min(abs(GOLDMAN - nextStim$size))))
-	    .jcall(nextObj, "V", "setDuration", as.double(nextStim$duration))
-	    .jcall(nextObj, "V", "setResponseWindow", as.double(nextStim$responseWindow))
+        if (is.null(nextStim)) {
+            nextObj <- .jnull("opi/OpiStaticStimulus")
+        } else {
+            nextObj <- .jnew("opi/OpiStaticStimulus", nextStim$x*10.0, nextStim$y*10.0, 0) # level no matter
+	        .jcall(nextObj, "V", "setSize", as.double(which.min(abs(GOLDMANN - nextStim$size))))
+	        .jcall(nextObj, "V", "setDuration", as.double(nextStim$duration))
+	        .jcall(nextObj, "V", "setResponseWindow", as.double(nextStim$responseWindow))
+        }
     }
 
-    if(min(abs(GOLDMAN - stim$size)) != 0)
+    if(min(abs(GOLDMANN - stim$size)) != 0)
         warning("opiPresent: Rounding stimulus size to nearest Goldmann size")
 
     done <- FALSE
     while (!done) {
 	done <- TRUE
-    	tryCatch(ret <- .jcall(opi.global.octopusObject, "Lopi/OpiPresentReturn;", "opiPresent", stimObj, nextObj), 
+    	tryCatch(ret <- .jcall(.Octopus900Env$octopusObject, "Lopi/OpiPresentReturn;", "opiPresent", stimObj, nextObj), 
+	             java.util.ConcurrentModificationException = function(e) { done = FALSE })
+    }
+
+    return(list(
+	    err =.jcall(ret, "S", "getErr"), 
+	    seen=.jcall(ret, "I", "getSeen"), 
+	    time=.jcall(ret, "I", "getTime"),
+	    frames=.jcall(ret, "[[B", "getFrames"),
+        numFrames=.jcall(ret, "I", "getNumFrames")
+	))
+}
+
+
+###########################################################################
+# INPUT: 
+#   As per OPI spec
+#   stim$color must be same as that initialised by opiSetBackground or opiInitialize
+#
+# Return a list of 
+#	err  = string message
+#	seen = 1 if seen, 0 otherwise
+#	time = reaction time
+###########################################################################
+octo900.opiPresent.opiTemporalStimulus <- function(stim, nextStim=NULL, ...) {
+    if (is.null(stim)) {
+        stimObj <- .jnull("opi/OpiTemporalStimulus")
+        nextObj <- .jnull("opi/OpiTemporalStimulus")
+    } else {
+        stimObj <- .jnew("opi/OpiTemporalStimulus", stim$x*10.0, stim$y*10.0, stim$rate)
+	    .jcall(stimObj, "V", "setSize", as.double(which.min(abs(GOLDMANN - stim$size))))
+	    .jcall(stimObj, "V", "setDuration", as.double(stim$duration))
+	    .jcall(stimObj, "V", "setResponseWindow", as.double(stim$responseWindow))
+        if (is.null(nextStim)) {
+            nextObj <- .jnull("opi/OpiTemporalStimulus")
+        } else {
+            nextObj <- .jnew("opi/OpiTemporalStimulus", nextStim$x*10.0, nextStim$y*10.0, 10.0) # rate no matter
+	        .jcall(nextObj, "V", "setSize", as.double(which.min(abs(GOLDMANN - nextStim$size))))
+	        .jcall(nextObj, "V", "setDuration", as.double(nextStim$duration))
+	        .jcall(nextObj, "V", "setResponseWindow", as.double(nextStim$responseWindow))
+        }
+    }
+
+    done <- FALSE
+    while (!done) {
+	done <- TRUE
+    	tryCatch(ret <- .jcall(.Octopus900Env$octopusObject, "Lopi/OpiPresentReturn;", "opiPresent", stimObj, nextObj), 
 	             java.util.ConcurrentModificationException = function(e) { done = FALSE })
     }
 
@@ -229,24 +258,61 @@ octo900.opiPresent.opiStaticStimulus <- function(stim, nextStim) {
 	    seen=.jcall(ret, "I", "getSeen"), 
 	    time=.jcall(ret, "I", "getTime")
 	))
-}
+
+}#opiPresent.opiTemporalStimulus()
 
 ########################################## TO DO
+octo900.opiPresent.opiKineticStimulus <- function(stim, ...) {
+    if (is.null(stim)) {
+        stimObj <- .jnull("opi/OpiTemporalStimulus")
+    } else { 
+            # convert sizes to GOLDMANN
+        stim$sizes <- sapply(stim$sizes, function(s) {
+            i <- which.min(abs(GOLDMANN - s))
+            if(abs(GOLDMANN[i] - s) > 0.000001) {
+                warning("opiPresent: Rounding stimulus size to nearest Goldmann size")
+            } 
+            return(i)
+        })
 
-octo900.opiPresent.opiTemporalStimulus <- function(stim, nextStim=NULL, ...) {
-    stop("ERROR: haven't written octo900 temporal persenter yet")
-}
+            # bit of a kludge as passing vector of one double seemed to barf
+        if (length(stim$path$x) == 2)
+            stimObj <- .jnew("opi/OpiKineticStimulus", 
+                sapply(stim$path$x, as.double), 
+                sapply(stim$path$y, as.double), 
+                as.double(cdTodb(stim$levels[1])),
+                as.double(stim$sizes[1]),
+                as.double(stim$speeds[1]))
+        else
+            stimObj <- .jnew("opi/OpiKineticStimulus", 
+                sapply(stim$path$x, as.double), 
+                sapply(stim$path$y, as.double), 
+                as.vector(sapply(sapply(stim$levels, cdTodb), as.double)),
+                as.vector(sapply(stim$sizes, as.double)), 
+                as.vector(sapply(stim$speeds, as.double)))
+    }
 
-octo900.opiPresent.opiKineticStimulus <- function(stim, nextStim=NULL, ...) {
-    stop("ERROR: haven't written octo900 kinetic persenter yet")
+    done <- FALSE
+    while (!done) {
+	done <- TRUE
+    	tryCatch(ret <- .jcall(.Octopus900Env$octopusObject, "Lopi/OpiPresentReturn;", "opiPresent", stimObj), 
+	             java.util.ConcurrentModificationException = function(e) { done = FALSE })
+    }
+
+    return(list(
+	    err =.jcall(ret, "S", "getErr"), 
+	    seen=.jcall(ret, "I", "getSeen"), 
+	    time=.jcall(ret, "I", "getTime")
+	))
+
 }
 
 ###########################################################################
 #
-# Input paras are the opi.O900.* constants
-# lum is in cd/m^2 (as per OPI spec) * 100 == opi.O900.BG_{OFF | 1 | 10 | 100 }
-# color is opi.O900.MET_COL_{WW | BY | RW | BLUE_WHITE | RED_YELLOW | WHITE_YELLOW }
-# fixation is opi.O900.FIX_{RING | CROSS | CENTRE}
+# Input paras are the Octopus900Env$* constants
+# lum is in cd/m^2 (as per OPI spec) * 100 == .Octopus900Env$BG_{OFF | 1 | 10 | 100 }
+# color is .Octopus900Env$MET_COL_{WW | BY | RW | BLUE_WHITE | RED_YELLOW | WHITE_YELLOW }
+# fixation is .Octopus900Env$FIX_{RING | CROSS | CENTRE}
 # fixIntensity is 0..100 %
 #
 # @return NULL is succeed.
@@ -258,16 +324,16 @@ octo900.opiSetBackground <- function(lum=NA, color=NA, fixation=NA, fixIntensity
     ret <- 0
     if (!is.na(color)) {
         if (!is.na(lum))
-            ret <- .jcall(opi.global.octopusObject, "I", "opiSetBackground", as.double(color), as.double(lum*100.0))
+            ret <- .jcall(.Octopus900Env$octopusObject, "I", "opiSetBackground", as.double(color), as.double(lum*100.0))
         else
-            ret <- .jcall(opi.global.octopusObject, "I", "opiSetBackground", as.double(color))
+            ret <- .jcall(.Octopus900Env$octopusObject, "I", "opiSetBackground", as.double(color))
     }
 
     if (ret != 0)
         return(ret)
 
     if (!is.na(fixation))
-        ret <- .jcall(opi.global.octopusObject, "I", "opiSetFixation", as.double(fixation), as.double(fixIntensity))
+        ret <- .jcall(.Octopus900Env$octopusObject, "I", "opiSetFixation", as.double(fixation), as.double(fixIntensity))
 
     if (ret == 0) {
         return(NULL)
@@ -280,7 +346,7 @@ octo900.opiSetBackground <- function(lum=NA, color=NA, fixation=NA, fixIntensity
 # return NULL on success (in fact, always!)
 ###########################################################################
 octo900.opiClose <- function() {
-    ret <- .jcall(opi.global.octopusObject, "I", "opiClose")
+    ret <- .jcall(.Octopus900Env$octopusObject, "I", "opiClose")
     return(NULL)
 }
 

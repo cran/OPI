@@ -22,6 +22,11 @@ Returns NULL if initialization succeeded,
 otherwise an implementation dependant error.
 }
 \references{
+Please cite:
+A. Turpin, P.H. Artes and A.M. McKendrick
+"The Open Perimetry Interface: An enabling tool for clinical visual psychophysics",
+Journal of Vision 12(11) 2012.
+
 http://perimetry.org/OPI
 }
 \author{

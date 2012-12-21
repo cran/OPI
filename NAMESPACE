@@ -1,7 +1,14 @@
 
 #exportPattern("^[[:alpha:]]+")
 
+export(ZEST)
+export(ZEST.start)
+export(ZEST.step)
+export(ZEST.stop)
+export(ZEST.final)
+
 export(FT)
+
 export(chooseOpi)
 export(dbTocd, cdTodb)
 
@@ -9,6 +16,7 @@ export(opiPresent)
 export(opiSetBackground)
 export(opiQueryDevice)
 export(opiInitialize)
+export(opiInitialise)
 export(opiClose)
 
 S3method(simH.opiPresent, opiStaticStimulus)
@@ -22,3 +30,4 @@ S3method(simG.opiPresent, opiTemporalStimulus)
 S3method(octo900.opiPresent, opiStaticStimulus)
 S3method(octo900.opiPresent, opiKineticStimulus)
 S3method(octo900.opiPresent, opiTemporalStimulus)
+export(.Octopus900Env)

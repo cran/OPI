@@ -1,5 +1,6 @@
 \name{opiInitialize}
 \alias{opiInitialize}
+\alias{opiInitialise}
 \title{
 Initialize OPI.
 }
@@ -9,6 +10,7 @@ Generic function for initialization of the chosen OPI implementation that is set
 }
 \usage{
 opiInitialize(...)
+opiInitialise(...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -16,7 +18,7 @@ opiInitialize(...)
 }
 \details{
 \subsection{SimHenson}{
-    \code{opiInitialize(type="C", cap=6)}
+    \code{opiInitialize(type="C", cap=6, display=NULL)}
 
     If the chosen OPI implementation is \code{SimHenson}, then
   \code{type} can be one of:
@@ -26,27 +28,46 @@ opiInitialize(...)
     \code{cap} is the maximum
     standard deviation value that the simulator will use for
     the slope/spread of the psychometric function.
+
+    If \code{display} is a vector of four numbers \code{c(xlow, xhi, ylow, yhi)}, then 
+    a plot area is created of dimension \code{xlim=range(xlow, xhi)} and 
+    \code{ylim=range(ylow, yhi)} and each call to \code{opiPresent} will
+    display a point on the area.
+    The color of the plot area can be set with \code{opiSetBackground}, and the 
+    color of the displayed point is determined by the stimulus passed to \code{opiPresent}.
 }
 \subsection{SimGaussian}{
-    \code{opiInitialize(sd)}
+    \code{opiInitialize(sd, display=NULL)}
 
     If the chosen OPI implementation is \code{SimGaussian}, then \code{sd}
     is the standard deviation value that the simulator will use for 
     the slope/spread of the psychometric function.
+
+    \code{display} is as for SimHenson.
 }
 \subsection{Octopus900}{
-    \code{opiInitialize(eyeSuiteJarLocation=NA, eyeSuiteSettingsLocation=NA, eye=NA)}
+    \code{opiInitialize(eyeSuiteJarLocation, eyeSuiteSettingsLocation, eye, gazeFeed=0)}
 
     If the chosen OPI implementation is \code{Octopus900}, then you must 
     specify two directory/folder names and the eye to be tested.
 
     \code{eyeSuiteJarLocation} is the folder name containing the EyeSuite jar files,
-    and should include the trainling slash.
+    and should include the trailing slash.
 
     \code{eyeSuiteSettingsLocation} is the folder name containing the EyeSuite setting files,
-    and should include the trainling slash.
+    and should include the trailing slash.
 
     \code{eye} must be either "left" or "right".
+
+    \code{gazeFeed} is 0 for no gaze tracking infromation. 
+    If \code{gazeFeed} is 1, then 
+    a single frame is returned as part of the value from \code{\link{opiPresent}}
+    which is the most recent frame captured. 
+    If \code{gazeFeed} is 2, then 
+    a all frames containing the asterix are returned as part of the value from \code{\link{opiPresent}},
+    which are the frames captured while a static stimulus is displayed. 
+    If \code{gazeFeed} is greater than zero, 
+    a Java driven window appears containing the live feed from the Octopus 900 gaze camera.
 }
 }
 
@@ -64,6 +85,11 @@ to change the background and stimulus colors.
 
 }
 \references{
+Please cite:
+A. Turpin, P.H. Artes and A.M. McKendrick
+"The Open Perimetry Interface: An enabling tool for clinical visual psychophysics",
+Journal of Vision 12(11) 2012.
+
 http://perimetry.org/OPI
 
 David B. Henson, Shaila Chaudry, Paul H. Artes, E. Brian Faragher, and
@@ -84,20 +110,30 @@ Andrew Tuprin <aturpin@unimelb.edu.au>
 }
 
 \examples{
+    # Set up a simple simulation for white-on-white perimetry
 chooseOpi("SimHenson")
 if (!is.null(opiInitialize(type="C", cap=6)))
     stop("opiInitialize failed")
 
+    # Set up a simple simulation for white-on-white perimetry
+    # and display the stimuli in a plot region
+chooseOpi("SimHenson")
+if (!is.null(opiInitialize(type="C", cap=6, display=c(-30,30,-30,30))))
+    stop("opiInitialize failed")
+
+    # Set up a simulation using a psychometric function that is
+    # a cumulative gaussian of standard deviation 2
 chooseOpi("SimGaussian")
 if (!is.null(opiInitialize(sd=2)))
     stop("opiInitialize failed")
 
 \dontrun{
+    # Set up the Octopus 900
 chooseOpi("Octopus900")
 if (!is.null(opiInitialize(
-        "C:/EyeSuite/", 
-        "C:/Documents and Settings/All Users/HAAG-STREIT/EyeSuite/",
-        "left")))
+        eyeSuiteJarLocation="C:/EyeSuite/", 
+        eyeSuiteSettingsLocation="C:/Documents and Settings/All Users/HAAG-STREIT/EyeSuite/",
+        eye="left")))
     stop("opiInitialize failed")
 }
 }
