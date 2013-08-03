@@ -76,6 +76,14 @@ opi.implementations <- list(
         opiSetBackground = "simG.opiSetBackground",
         opiQueryDevice   = "simG.opiQueryDevice",
         opiPresent       = "simG.opiPresent"
+    ),
+    list(
+        name="SimHensonRT",
+        opiInitialize    = "simH_RT.opiInitialize",
+        opiClose         = "simH_RT.opiClose",
+        opiSetBackground = "simH_RT.opiSetBackground",
+        opiQueryDevice   = "simH_RT.opiQueryDevice",
+        opiPresent       = "simH_RT.opiPresent"
     )
 )
 
@@ -96,6 +104,8 @@ chooseOpi <- function(opiImplementation) {
         #
         # If NULL, print the list of possible
         #
+    if (missing(opiImplementation))
+        opiImplementation <- NULL
     if (is.null(opiImplementation)) {
         print(possible)
         return(TRUE)
@@ -140,7 +150,7 @@ chooseOpi <- function(opiImplementation) {
 # Simply send the opi*() call to the right implementation
 ####################################################################################
 opiDistributor <- function(method, ...) {
-    if (is.na(.OpiEnv$chooser)) {
+    if (!exists("chooser", where=.OpiEnv) || is.na(.OpiEnv$chooser)) {
         msg <- "You have not chosen a valid OPI implementation. Use chooseOpi()"
         warning(msg)
         return(msg)
@@ -151,6 +161,10 @@ opiDistributor <- function(method, ...) {
 #print(paste("Allowed args: ", allowedArgs))
 #print(paste("Have args: ", haveArgs))
     argsToPass  <- intersect(allowedArgs, haveArgs)
+    argsNotPassed  <- setdiff(haveArgs, argsToPass)
+
+    if (length(argsNotPassed) > 0)
+        warning(paste(method, "Ignored argument ", argsNotPassed, "\n"))
 #print(paste("Passing args: ", argsToPass))
     do.call(toCall, list(...)[argsToPass])
 }

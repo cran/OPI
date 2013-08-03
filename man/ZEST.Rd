@@ -10,13 +10,13 @@
 ZEST
 }
 \description{
-An implementation of the Bayesian test procedure of King-Smith et al.
+An implementation of the Bayesian test procedures of King-Smith et al. and Watson and Pelli. 
 Note that we use the term \code{pdf} throughout as in the original paper, even though
 they are discrete probability functions in this implementation.
 }
 \usage{
 ZEST(domain=0:40, prior=rep(1/length(domain),length(domain)), 
-     likelihood=sapply(domain, function(tt) { 0.03 + (1-0.03-0.03)*(1-pnorm(domain, tt, 1)) }),
+     likelihood=sapply(domain,function(tt) {0.03+(1-0.03-0.03)*(1-pnorm(domain,tt,1))}),
      stopType="S", stopValue=1.5,
      minStimulus=head(domain,1), 
      maxStimulus=tail(domain,1),
@@ -28,7 +28,7 @@ ZEST(domain=0:40, prior=rep(1/length(domain),length(domain)),
      ...) 
 
 ZEST.start(domain=0:40, prior=rep(1/length(domain),length(domain)), 
-     likelihood=sapply(domain, function(tt) { 0.03 + (1-0.03-0.03)*(1-pnorm(domain, tt, 1)) }),
+     likelihood=sapply(domain,function(tt) {0.03+(1-0.03-0.03)*(1-pnorm(domain,tt,1))}),
      stopType="S", stopValue=1.5,
      minStimulus=head(domain,1), 
      maxStimulus=tail(domain,1),
@@ -91,7 +91,8 @@ Extra parameters to pass to the opiPresent function
 }
 }
 \details{
-    This is an implementation of King-Smith et al.'s ZEST procedure.
+    This is an implementation of King-Smith et al.'s ZEST procedure 
+    and Watson and Pelli's QUEST procedure.
     All presentaions are rounded to an element of the supplied domain.
 
     Note this function will repeatedly call \code{opiPresent} for a stimulus 
@@ -110,7 +111,7 @@ Extra parameters to pass to the opiPresent function
 \code{ZEST} returns a list containing
 \itemize{
 \item{npres:}{ Total number of presentations used.}
-\item{respSeq:}{ Response sequence stored as a list of (stimulus, seen) pairs.}
+\item{respSeq:}{Response sequence stored as a matrix: row 1 is dB values, row 2 is 1/0 for seen/not-seen.}
 \item{pdfs:}{ If \code{verbose} is bigger than 0, then this is a list of the pdfs used for each presentation,
 otherwise NULL.}
 \item{final}{ The mean/median/mode of the final pdf, depending on \code{stimChoice}, which is the determined threshold.}
@@ -155,7 +156,7 @@ contains the following.
 }
 
 
-\code{ZEST.stop} returns \code{TRUE} is the ZEST has reached its stopping criteria, and \code{FALSE} otherwise.
+\code{ZEST.stop} returns \code{TRUE} if the ZEST has reached its stopping criteria, and \code{FALSE} otherwise.
 
 \code{ZEST.final} returns an estimate of threshold based on state. 
 If \code{state$stimChoice} is \code{mean} then the mean is returned.
@@ -209,7 +210,7 @@ makeStim <- function(db, n) {
     return(s)
 }
 
-repp <- function(...) sapply(1:100, function(i) ZEST(makeStim=makeStim, ...))
+repp <- function(...) sapply(1:50, function(i) ZEST(makeStim=makeStim, ...))
 a <- repp(stopType="H", stopValue=  3, verbose=0, tt=30, fpr=0.03)
 b <- repp(stopType="S", stopValue=1.5, verbose=0, tt=30, fpr=0.03)
 c <- repp(stopType="S", stopValue=2.0, verbose=0, tt=30, fpr=0.03)
@@ -249,19 +250,22 @@ states <- lapply(locations, function(loc) {
         minStimulus=0,
         maxStimulus=40,
         makeStim=makeStimHelper(db,n,loc[1],loc[2]),
-        stopType="S", stopValue= 1.5, tt=loc[3], fpr=0.03, fn=0.01)
+        stopType="S", stopValue= 1.5, tt=loc[3], fpr=0.03, fnr=0.01)
 })
 
     # Loop through until all states are "stop"
 while(!all(st <- unlist(lapply(states, ZEST.stop)))) {
-    i <- sample(which(!st), 1)  # choose a random, unstopped state
-    r <- ZEST.step(states[[i]]) # step it
-    states[[i]] <- r$state      # update the states
+    i <- which(!st)                         # choose a random, 
+    i <- i[runif(1, min=1, max=length(i))]  # unstopped state
+    r <- ZEST.step(states[[i]])             # step it
+    states[[i]] <- r$state                  # update the states
 }
 
 finals <- lapply(states, ZEST.final)    # get final estimates of threshold
-for(i in 1:length(locations))
-    #cat(sprintf("Location (%+2d,%+2d) has threshold %4.2f\n",locations[[i]][1], locations[[i]][2], finals[[i]]))
+for(i in 1:length(locations)) {
+    #cat(sprintf("Location (%+2d,%+2d) ",locations[[i]][1], locations[[i]][2]))
+    #cat(sprintf("has threshold %4.2f\n", finals[[i]]))
+}
 
 if (!is.null(opiClose()))
     warning("opiClose() failed")

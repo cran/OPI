@@ -21,6 +21,9 @@ chooseOpi(opiImplementation)
                 according to Henson et al (2000) where variability 
                 increases as true threshold (Humphrey dB) value 
                 decreases. 
+    \item\code{"SimHensonRT"} as for SimHenson, but response times
+                in ms are sampled from a supplied response time data set 
+                for each true positive response.
     \item\code{"SimGaussian"} for a simulator that uses a cummulative gaussian 
                 psychometric function with 
                 standard deviation supplied in opiInitialize(). 
@@ -38,6 +41,10 @@ Alec Ansons.
 Response Variability in the Visual Field: Comparison of Optic Neuritis,
 Glaucoma, Ocular Hypertension, and Normal Eyes.
 Investigative Ophthalmology & Visual Science, February 2000, Vol. 41(2).
+
+A.M. McKendrick, J. Denniss and A. Turpin 
+"Response times across the visual field: empirical observations and application to threshold
+determination".  In submission, August 2013.
 
 Please cite:
 A. Turpin, P.H. Artes and A.M. McKendrick

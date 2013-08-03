@@ -32,6 +32,8 @@
 # Author: Andrew Turpin
 #
 # July 2012
+# Modified Feb 2013: opiPresent returns only a single frame
+# Modified Nov 2013: add Tony's many holed wheel
 #
 
 require(rJava)
@@ -113,6 +115,13 @@ setupBackgroundConstants <- function() {
 # Goldmann target sizes in degrees
 ###################################################################
 GOLDMANN <- c(6.5, 13, 26, 52, 104) / 60
+
+
+    # uncomment for Tony's big wheel
+#mm <- c(0.125,0.25,0.5,1,1.41,2,2.83,4,5.66,8,11.3,16,22.6,32,64,128,256)
+#ind <- c(32,28,31,26,30,29,27,24,25,23,21,22,39,38,20,37,36)
+#GOLDMANN <- rep(NA,39)
+#GOLDMANN[ind] <- (sqrt(mm/pi)*180/pi/149.1954)
 
 #######################################################################
 # INPUT: 
@@ -209,10 +218,12 @@ octo900.opiPresent.opiStaticStimulus <- function(stim, nextStim) {
 
     return(list(
 	    err =.jcall(ret, "S", "getErr"), 
-	    seen=.jcall(ret, "I", "getSeen"), 
+	    seen=ifelse(.jcall(ret, "I", "getSeen") == 0, 0, 1),
 	    time=.jcall(ret, "I", "getTime"),
-	    frames=.jcall(ret, "[[B", "getFrames"),
-        numFrames=.jcall(ret, "I", "getNumFrames")
+	    frames=.jcall(ret, "[I", "getFrameInt"),
+        numFrames=.jcall(ret, "I", "getNumFrames"),
+        width=.jcall(ret, "I", "getWidth"),
+        height=.jcall(ret, "I", "getHeight")
 	))
 }
 
@@ -255,7 +266,7 @@ octo900.opiPresent.opiTemporalStimulus <- function(stim, nextStim=NULL, ...) {
 
     return(list(
 	    err =.jcall(ret, "S", "getErr"), 
-	    seen=.jcall(ret, "I", "getSeen"), 
+	    seen=ifelse(.jcall(ret, "I", "getSeen") == 0, 0, 1),
 	    time=.jcall(ret, "I", "getTime")
 	))
 
@@ -301,7 +312,7 @@ octo900.opiPresent.opiKineticStimulus <- function(stim, ...) {
 
     return(list(
 	    err =.jcall(ret, "S", "getErr"), 
-	    seen=.jcall(ret, "I", "getSeen"), 
+	    seen=ifelse(.jcall(ret, "I", "getSeen") == 0, 0, 1),
 	    time=.jcall(ret, "I", "getTime")
 	))
 

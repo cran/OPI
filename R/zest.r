@@ -1,7 +1,7 @@
 #
 # ZEST algorithm that maintains state in a list - good for interleaved.
-# Based on zest.r
 # Includes
+#     ZEST          # just for a single location
 #     ZEST.start    # initialise list state
 #     ZEST.step     # take state, present stim, update and return state
 #     ZEST.stop     # boolean - true if state is finished
@@ -77,6 +77,11 @@ ZEST.start <- function(domain=0:40, prior=rep(1/length(domain),length(domain)),
     if (ncol(likelihood) != length(domain))
         stop(paste("ZEST.start: not enough cols in likelihood. Expect",length(domain)))
 
+    if (!is.element(minStimulus, domain))
+        warning(paste("ZEST.start: you specified minStimulus=",minStimulus,"but it is not in domain."))
+    if (!is.element(maxStimulus, domain))
+        warning(paste("ZEST.start: you specified maxStimulus=",maxStimulus,"but it is not in domain."))
+
     pdf <- prior/sum(prior)
 
     return(list(name="ZEST",
@@ -144,10 +149,10 @@ ZEST.step <- function(state, nextStim=NULL) {
     state$numPresentations <- state$numPresentations + 1
     
     if(opiResp$seen) { 
-        if (state$domain[stimIndex] == state$maxStimulus) state$currSeenLimit <- state$currSeenLimit + 1
+        if (stim == state$maxStimulus) state$currSeenLimit <- state$currSeenLimit + 1
         state$pdf <- state$pdf * state$likelihood[stimIndex, ]
     } else {
-        if (state$domain[stimIndex] == state$minStimulus) state$currNotSeenLimit <- state$currNotSeenLimit + 1
+        if (stim == state$minStimulus) state$currNotSeenLimit <- state$currNotSeenLimit + 1
         state$pdf <- state$pdf * (1 - state$likelihood[stimIndex, ])
     }
     state$pdf <- state$pdf/sum(state$pdf)
@@ -160,8 +165,8 @@ ZEST.step <- function(state, nextStim=NULL) {
 #
 # Input parameters
 #   State list as returned by ZEST.start/step
-# Returns a list containing
-#   TRUE/FALSE
+# Returns 
+#   TRUE or FALSE
 ################################################################################
 ZEST.stop <- function(state) {
     keepGoing <- (
@@ -195,6 +200,7 @@ ZEST.final <- function(state) {
     } else if (state$stimChoice == "median") {
         final <- state$domain[which.min(abs(cumsum(state$pdf) - 0.5))]
     } 
+
     return(final)
 }#ZEST.final
 
@@ -218,7 +224,7 @@ ZEST.final <- function(state) {
 #   ...           Parameters for opiPresent
 # Returns a list containing
 #   npres    Total number of presentations
-#   respSeq  Response sequence stored as a list of (seen,dB) pairs
+#   respSeq  Response sequence stored as a matrix: row 1 = dB, row 2 = response 1/0
 #   pdfs     Sequence of pdfs used (if verbose)
 #
 # Note 
@@ -252,17 +258,12 @@ ZEST <- function(domain=0:40, prior=rep(1/length(domain),length(domain)),
             cat(sprintf("stdev= %8.4g H= %8.4g\n", ZEST.stdev(state), ZEST.entropy(state)))
         }
         if (verbose > 0)
-            pdfs <- c(pdfs, list(pdf))
+            pdfs <- c(pdfs, list(state$pdf))
     }
 
-    zip <- function(a,b) {
-        res <- NULL
-        for(i in 1:length(a))
-            res <- c(res, list(c(a[i],b[i])))
-    }
     return(list(
         npres=tail(state$numPresentations,1),        # number of presentations
-        respSeq=zip(state$stimuli, state$responses), # reposnse sequence (list of pairs)
+        respSeq=mapply(c, state$stimuli, state$responses), # reposnse sequence (list of pairs)
         pdfs=pdfs,                                   # list of pdfs used (if verbose > 0)
         final=ZEST.final(state)                      # final threshold estimate
     ))

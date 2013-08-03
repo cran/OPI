@@ -71,11 +71,17 @@ setGeneric("simH.opiPresent")
 
 #
 # Helper function that allows different coefficients from Table 1 of Henson 2000.
+# Note prob seeing <0 is always false positive rate 
 #
 simH.present <- function(db, cap=6, fpr=0.03, fnr=0.01, tt=30, A, B) {
-    pxVar <- min(cap, exp(A*tt + B)) # variability of patient, henson formula 
 
-    prSeeing <- fpr + (1-fpr-fnr)*(1-pnorm(db, mean=tt, sd=pxVar))    
+    if (tt >= 0) {
+        pxVar <- min(cap, exp(A*tt + B)) # variability of patient, henson formula 
+
+        prSeeing <- fpr + (1-fpr-fnr)*(1-pnorm(db, mean=tt, sd=pxVar))    
+    } else {
+        prSeeing <- fpr
+    }
 
     return ( list(
         err = NULL,

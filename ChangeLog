@@ -42,3 +42,22 @@ OPI 1.4
   - deleted opi.procedure.{load|save}
   - moved chooseOpi() into opi.r
   - NOTE - must pass junk params in .jinit() and .jpackage wont work...
+
+OPI 1.5
+  - opiPresent only returns a single frame (array of int)
+  - seen returned from opiPresent is limited to 0 or 1
+  - added !exist to opiDistributor
+  - simHenson uses false pos rate to determine seen if db < 0 
+  - changed ZEST.final to return "limit" 
+  - fixed verbose=1 bug in zest.r
+  - changed respSeq return type from ZEST
+
+OPI 1.6
+ - added SimHensonRT and related man and data
+ - fixed ZEST bug 
+ - added warnings about non-OPI parameters to opi functions
+ - fixed small typos in ZEST man page
+ - added FT.start/step/stop/final/final.details
+
+OPI 1.6.2
+ - branch version that uses Tony's special size wheel, not GOLDMANN

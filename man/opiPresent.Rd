@@ -63,6 +63,24 @@ is set with the call to \code{opiInitialize}, and \code{A} and \code{B}
 are from Table 1 in Henson et al (2000). Which values are used is
 determined by \code{simH.type} which is also set in the call to
 \code{opiInitialize}.
+
+Note that if the stimulus value is less than zero, then the Henson
+formula is not used. The probability of seeing is \code{fpr}.
+}
+
+\subsection{SimHensonRT}{
+
+\code{opiPresent(stim, nextStim=NULL, fpr=0.03, fnr=0.01, tt=30, dist=stim$level - tt)}
+
+This presentation is the same as for \code{SimHenson}, but reaction
+times are determined by sampling from \code{rtData} as passed to
+\code{opiInitialize}.  The \code{dist} parameter is the distance
+of the stimulus level from the true threshold, and should be in the
+same units as the \code{Dist} column of \code{rtData}. The default
+is just the straight difference between the stimulus level and the
+true threshold, but you might want it scaled somehow to match
+\code{rtData}.
+
 }
 
 
@@ -113,10 +131,15 @@ until the response from the subject if \code{seen} is \code{TRUE}.
 If \code{seen} is \code{FALSE}, this
 value is undefined.
 }
-\item{frames}{Only returned for Octopus 900. A 2D byte array of pixels for an image that is 320 wide. 
+\item{frames}{Only returned for Octopus 900. An array of integer 0..255 for gaze image. 
+In version 1.5, only a single frame is returned.
 See the parameter \code{gazeFeed} for \code{\link{opiInitialize}} to control what frames are returned.
 }
 \item{numFrames}{Only returned for Octopus 900. The number of frames in \code{frames}.
+}
+\item{width}{Width of frame in \code{frames}.
+}
+\item{height}{Height of frame in \code{frames}.
 }
 }
 \references{
@@ -161,6 +184,18 @@ result <- opiPresent(stim=makeStim(10,0), tt=30, fpr=0.15, fnr=0.01)
 
     # Will not work as 'stim' is not named
 #result <- opiPresent(makeStim(10,0), tt=30, fpr=0.15, fnr=0.01)
+
+if (!is.null(opiClose()))
+    warning("opiClose() failed")
+
+    # Same but with simulated reaction times
+chooseOpi("SimHensonRT")
+data(RtSigmaUnits)
+if (!is.null(opiInitialize(type="C", cap=6, rtData=RtSigmaUnits)))
+    stop("opiInitialize failed")
+
+dist <- (10 - 30)/min(exp(-0.098 * 30 + 3.62), 6)
+result <- opiPresent(stim=makeStim(10,0), tt=30, fpr=0.15, fnr=0.01, dist=dist)
 
 if (!is.null(opiClose()))
     warning("opiClose() failed")
