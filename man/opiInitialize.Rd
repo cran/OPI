@@ -18,13 +18,15 @@ opiInitialise(...)
 }
 \details{
 \subsection{SimHenson}{
-    \code{opiInitialize(type="C", cap=6, display=NULL)}
+    \code{opiInitialize(type="C", A=NA, B=NA, cap=6, display=NULL, maxStim=10000/pi)}
 
     If the chosen OPI implementation is \code{SimHenson}, then
   \code{type} can be one of:
-    \code{"N"}, for normal patients; 
-    \code{"G"}, for POAG patients; and
-    \code{"C"}, for a combination. See Table 1 in Henson et al (2000).
+    \code{"N"}, for normal patients; \code{"G"}, for POAG patients;
+    and \code{"C"}, for a combination. See Table 1 in Henson et al
+    (2000).  If \code{type} is \code{"X"} then \code{A} and \code{B}
+    should be specified and are used in place of one of the three
+    A/B combinations as in Henson et al (2000).
     \code{cap} is the maximum
     standard deviation value that the simulator will use for
     the slope/spread of the psychometric function.
@@ -35,12 +37,15 @@ opiInitialise(...)
     display a point on the area.
     The color of the plot area can be set with \code{opiSetBackground}, and the 
     color of the displayed point is determined by the stimulus passed to \code{opiPresent}.
+
+    \code{maxStim} is the maximum stimuls value in cd/\eqn{\mbox{m}^2}{m^2}. This is 
+    used in converting cd/\eqn{\mbox{m}^2}{m^2} to dB values, and vice versa.
 }
 \subsection{SimHensonRT}{
-    \code{opiInitialize(type="C", cap=6, display=NULL, rtData)}
+    \code{opiInitialize(type="C", A=NA, B=NA, cap=6, display=NULL, maxStim=10000/pi, rtData, rtFP=1:1600)}
 
     If the chosen OPI implementation is \code{SimHensonRT}, then
-    the first three parameters are as in \code{SimHenson}, and 
+    the first six parameters are as in \code{SimHenson}, and 
   \code{rtData} is a data frame with at least 2 columns:
     \code{"Rt"}, reponse time; and
     \code{"Dist"}, signifying that distance between assumed threshold and stimulus value in
@@ -50,24 +55,25 @@ opiInitialise(...)
     that can be loaded with the commands
     \code{data(RtSigmaUnits)} or \code{data(RtDbUnits)}, and are suitable to pass as values
     for \code{rtData}.
+
+    \code{rtFp} gives the vector of values in milliseconds from
+    which a response time for a false positive response is randomly
+    sampled.
 }
 \subsection{SimGaussian}{
-    \code{opiInitialize(sd, display=NULL)}
+    \code{opiInitialize(sd, display=NULL, maxStim=10000/pi)}
 
     If the chosen OPI implementation is \code{SimGaussian}, then \code{sd}
     is the standard deviation value that the simulator will use for 
     the slope/spread of the psychometric function.
 
-    \code{display} is as for SimHenson.
+    \code{display} and \code{maxStim} is as for SimHenson.
 }
 \subsection{Octopus900}{
-    \code{opiInitialize(eyeSuiteJarLocation, eyeSuiteSettingsLocation, eye, gazeFeed=0)}
+    \code{opiInitialize(eyeSuiteSettingsLocation, eye, gazeFeed=0)}
 
     If the chosen OPI implementation is \code{Octopus900}, then you must 
-    specify two directory/folder names and the eye to be tested.
-
-    \code{eyeSuiteJarLocation} is the folder name containing the EyeSuite jar files,
-    and should include the trailing slash.
+    specify a directory and the eye to be tested.
 
     \code{eyeSuiteSettingsLocation} is the folder name containing the EyeSuite setting files,
     and should include the trailing slash.
@@ -84,6 +90,42 @@ opiInitialise(...)
     If \code{gazeFeed} is greater than zero, 
     a Java driven window appears containing the live feed from the Octopus 900 gaze camera.
 }
+\subsection{Octopus600}{
+    \code{opiInitialize(ipAddress, eye, pupilTracking=FALSE, pulsar=FALSE, eyeControl=0)}
+
+    If the chosen OPI implementation is \code{Octopus600}, then you must 
+    specify the IP address of the Octopus 600 and the eye to test.
+
+    \code{ipAddress} is the IP address of the Octopus 600 as a string.
+
+    \code{eye} must be either "left" or "right".
+    
+    \code{pupilTracking} is TRUE to turn on IR illumination and set pupil black level (which happens
+    at the first stimulus presentation).
+    
+    \code{pulsar} is TRUE for pulsar stimulus, FALSE for size III white-on-white.
+
+    \code{eyeControl}
+    \itemize{ 
+      \item 0 is off
+      \item 1 is eye blink
+      \item 2 is eye blink, forehead rest, fixation control
+      \item 3 is eye blink, forehead rest, fixation control, fast eye movements
+    }
+}
+\subsection{KowaAP7000}{
+    \code{opiInitialize(ip, port, mode)}
+
+    If the chosen OPI implementation is \code{KowaAP7000}, then you must 
+    specify the IP address and port of the AP 7000, and the mode.
+
+    \code{ipAddress} is the IP address of the AP 7000 as a string.
+
+    \code{port} is the TCP/IP port of the AP 7000 as a number.
+
+    \code{mode} must be either \code{.KowaAP7000Env$MODE_WoW} for white-on-white 
+        perimetry, or \code{.KowaAP7000Env$MODE_BoY} for blue-on-yellow perimetry.
+}
 }
 
 \value{
@@ -96,6 +138,12 @@ Returns NULL if successful, 1 if Octopus900 is already initialised by a previous
 
 The default background and stimulus setup is to white-on-white perimetry. Use \code{opiSetBackground}
 to change the background and stimulus colors.
+}
+
+\subsection{Octopus600}{
+Returns NULL if successful, or an Octopus 600 error code
+
+The default background and stimulus setup is to white-on-white perimetry.
 }
 
 }
@@ -155,9 +203,16 @@ if (!is.null(opiInitialize(sd=2)))
     # Set up the Octopus 900
 chooseOpi("Octopus900")
 if (!is.null(opiInitialize(
-        eyeSuiteJarLocation="C:/EyeSuite/", 
-        eyeSuiteSettingsLocation="C:/Documents and Settings/All Users/HAAG-STREIT/EyeSuite/",
+        eyeSuiteJarLocation="C:/Program Files (x86)/Haag-Streit/EyeSuite/", 
+        eyeSuiteSettingsLocation="C:/ProgramData/Haag-Streit/EyeSuite/",
         eye="left")))
+    stop("opiInitialize failed")
+}
+
+\dontrun{
+    # Set up the Kowa AP 7000
+chooseOpi("KowaAP7000")
+if (!is.null(opiInitialize(ip="192.168.1.7", port=44965, mode=.KowaAP7000Env$MODE_WoW)))
     stop("opiInitialize failed")
 }
 }

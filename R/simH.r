@@ -5,6 +5,9 @@
 # Author: Andrew Turpin    (aturpin@unimelb.edu.au)
 # Date: June 2012
 #
+# Modified  8 Jul 2014: added type="X" to opiInitialise and opiPresent
+# Modified 20 Jul 2014: added maxStim argument for cdTodB conversion
+#
 # Copyright 2012 Andrew Turpin
 # This program is part of the OPI (http://perimetry.org/OPI).
 # OPI is free software: you can redistribute it and/or modify
@@ -24,18 +27,21 @@
 simH.opiClose         <- function() { return(NULL) }
 simH.opiQueryDevice   <- function() { return (list(type="SimHenson")) }
 
-.SimHEnv <- new.env(size=2)
+if (!exists(".SimHEnv"))
+    .SimHEnv <- new.env(size=5)
 
 ################################################################################
 # Input
 #   type N|G|C for the three Henson params
+#   type X to specify your own A and B values (eg different dB scale)
 #   cap  dB value for capping stdev form Henson formula
 #   display Dimensions of plot area (-x,+x,-y,+y) to display stim. No display if NULL
+#   maxStim Maximum stimulus value in cd/m^2 used for db <-> cd/m^2 conversions
 #
 # Return NULL if succesful, string error message otherwise  
 ################################################################################
-simH.opiInitialize <- function(type="C", cap=6, display=NULL) {
-    if (!is.element(type,c("N","G","C"))) {
+simH.opiInitialize <- function(type="C", A=NA, B=NA, cap=6, display=NULL, maxStim=10000/pi) {
+    if (!is.element(type,c("N","G","C","X"))) {
         msg <- paste("Bad 'type' specified for SimHenson in opiInitialize():",type)
         warning(msg)
         return(msg)
@@ -45,6 +51,12 @@ simH.opiInitialize <- function(type="C", cap=6, display=NULL) {
         warning("cap is negative in call to opiInitialize (simHenson)")
     .SimHEnv$type <- type
     .SimHEnv$cap  <-  cap
+    .SimHEnv$A    <-  A
+    .SimHEnv$B    <-  B
+    .SimHEnv$maxStim <- maxStim
+
+    if (type == "X" && (is.na(A) || is.na(B)))
+        warning("opiInitialize (SimHenson): you have chosen type X, but one/both A and B are NA")
 
     if(simDisplay.setupDisplay(display))
         warning("opiInitialize (SimHenson): display parameter may not contain 4 numbers.")
@@ -115,11 +127,13 @@ simH.opiPresent.opiStaticStimulus <- function(stim, nextStim=NULL, fpr=0.03, fnr
     simDisplay.present(stim$x, stim$y, stim$color, stim$duration, stim$responseWindow)
 
     if (.SimHEnv$type == "N") {
-        return(simH.present(cdTodb(stim$level), .SimHEnv$cap, fpr, fnr, tt, -0.066, 2.81))
+        return(simH.present(cdTodb(stim$level, .SimHEnv$maxStim), .SimHEnv$cap, fpr, fnr, tt, -0.066, 2.81))
     } else if (.SimHEnv$type == "G") {
-        return(simH.present(cdTodb(stim$level), .SimHEnv$cap, fpr, fnr, tt, -0.098, 3.62))
+        return(simH.present(cdTodb(stim$level, .SimHEnv$maxStim), .SimHEnv$cap, fpr, fnr, tt, -0.098, 3.62))
     } else if (.SimHEnv$type == "C") {
-        return(simH.present(cdTodb(stim$level), .SimHEnv$cap, fpr, fnr, tt, -0.081, 3.27))
+        return(simH.present(cdTodb(stim$level, .SimHEnv$maxStim), .SimHEnv$cap, fpr, fnr, tt, -0.081, 3.27))
+    } else if (.SimHEnv$type == "X") {
+        return(simH.present(cdTodb(stim$level, .SimHEnv$maxStim), .SimHEnv$cap, fpr, fnr, tt, .SimHEnv$A, .SimHEnv$B))
     } else {
         return ( list(
             err = "Unknown error in opiPresent() for SimHenson",

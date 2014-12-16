@@ -13,6 +13,8 @@
 #
 # Author: Andrew Turpin    (aturpin@unimelb.edu.au)
 # Date: June 2012
+# Modified:    Sep 2014 - added Octopus 600
+#           16 Dec 2014 - added Kowa AP 7000
 #
 # Copyright 2012 Andrew Turpin and Jonathan Denniss
 # This program is part of the OPI (http://perimetry.org/OPI).
@@ -38,12 +40,28 @@
 ################################################################################
 opi.implementations <- list(
     list(
+        name="KowaAP7000",
+        opiInitialize    = "kowaAP7000.opiInitialize",
+        opiClose         = "kowaAP7000.opiClose",
+        opiSetBackground = "kowaAP7000.opiSetBackground",
+        opiQueryDevice   = "kowaAP7000.opiQueryDevice",
+        opiPresent       = "kowaAP7000.opiPresent"
+    ),
+    list(
         name="Octopus900",
         opiInitialize    = "octo900.opiInitialize",
         opiClose         = "octo900.opiClose",
         opiSetBackground = "octo900.opiSetBackground",
         opiQueryDevice   = "octo900.opiQueryDevice",
         opiPresent       = "octo900.opiPresent"
+    ),
+    list(
+      name="Octopus600",
+      opiInitialize    = "octo600.opiInitialize",
+      opiClose         = "octo600.opiClose",
+      opiSetBackground = "octo600.opiSetBackground",
+      opiQueryDevice   = "octo600.opiQueryDevice",
+      opiPresent       = "octo600.opiPresent"
     ),
     list(
         name="SimNo",
@@ -123,13 +141,13 @@ chooseOpi <- function(opiImplementation) {
         #
         # Check OPIOctopus900 package exists
         #
-    if ((opiImplementation == "Octopus900") && !require(OPIOctopus900)) {
-        cat("***********************************************************************\n")
-        cat("* You cannot choose the Octopus900 OPI without installing the package *\n")
-        cat("* OPIOctopus900, which is available with permission from HAAG-STREIT. *\n")
-        cat("***********************************************************************\n")
-        stop("Get the Octopus900 package")
-    }
+    #if ((opiImplementation == "Octopus900") && !require(OPIOctopus900)) {
+    #    cat("***********************************************************************\n")
+    #    cat("* You cannot choose the Octopus900 OPI without installing the package *\n")
+    #    cat("* OPIOctopus900, which is available with permission from HAAG-STREIT. *\n")
+    #    cat("***********************************************************************\n")
+    #    stop("Get the Octopus900 package")
+    #}
 
         #
         # Find the index in opi.implementations
