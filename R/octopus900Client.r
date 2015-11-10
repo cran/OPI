@@ -64,7 +64,8 @@ setupBackgroundConstants <- function() {
             warning(paste("Cannot set",cName,"constant for the O900."))
         } else {
             assign(cName, as.double(res), envir = .Octopus900Env) 
-            assign("constList", c(.Octopus900Env$constList, list(list(cName, as.double(res)))), envir = .Octopus900Env)
+            assign("constList", c(.Octopus900Env$constList, list(list(cName, as.double(res)))), 
+                    envir = .Octopus900Env)
         }
     }
 
@@ -97,25 +98,14 @@ setupBackgroundConstants <- function() {
     assign("MET_COL_WY", .Octopus900Env$MET_COL_WHITE_YELLOW, envir = .Octopus900Env)
 }
 
-
-###################################################################
-# Goldmann target sizes in degrees
-###################################################################
-GOLDMANN <- c(6.5, 13, 26, 52, 104) / 60
-
-
-    # uncomment for Tony's big wheel
-#mm <- c(0.125,0.25,0.5,1,1.41,2,2.83,4,5.66,8,11.3,16,22.6,32,64,128,256)
-#ind <- c(32,28,31,26,30,29,27,24,25,23,21,22,39,38,20,37,36)
-#GOLDMANN <- rep(NA,39)
-#GOLDMANN[ind] <- (sqrt(mm/pi)*180/pi/149.1954)
-
 #######################################################################
 # INPUT: 
 #   serverPort               = port number on which server is listening
 #   eyeSuiteSettingsLocation = dir name containing EyeSuite settings
 #   eye                      = "right" or "left"
 #   gazeFeed                 = 0 (none), 1 (single frame), 2 (all frames with *)
+#   bigWheel                 = FALSE (standard machine), TRUE for modified apeture wheel
+#   buzzer                   = 0 (no buzzer),1,2, 3 (max volume)
 #
 #   Both input dirs should INCLUDE THE TRAILING SLASH.
 #
@@ -124,8 +114,22 @@ GOLDMANN <- c(6.5, 13, 26, 52, 104) / 60
 # @return 2 if failed to make ready
 #
 #######################################################################
-octo900.opiInitialize <- function(serverPort=50001,eyeSuiteSettingsLocation=NA, eye=NA, gazeFeed=0) {
-    assign("gazeFeed", gazeFeed, envir=.OpiEnv)
+octo900.opiInitialize <- function(serverPort=50001,eyeSuiteSettingsLocation=NA, 
+                                  eye=NA, gazeFeed=0, bigWheel=FALSE, buzzer=0) {
+    assign("gazeFeed", gazeFeed, envir=.Octopus900Env)
+
+    if (!bigWheel) {
+        assign("GOLDMANN", c(6.5, 13, 26, 52, 104) / 60, envir=.Octopus900Env)
+    } else {
+        mm <- c(0.125,0.25,0.5,1,1.41,2,2.83,4,5.66,8,11.3,16,22.6,32,64,128,256)
+        ind <- c(32,28,31,26,30,29,27,24,25,23,21,22,39,38,20,37,36)
+        GOLDMANN <- rep(NA,39)
+        GOLDMANN[ind] <- (sqrt(mm/pi)*180/pi/149.1954)
+        assign("GOLDMANN", GOLDMANN, envir=.Octopus900Env)
+    }
+
+    if (is.na(buzzer) || buzzer < 0) buzzer <- 0
+    if (buzzer > 3) buzzer <- 3
 
     cat("Looking for server... ")
     suppressWarnings(tryCatch(    
@@ -153,51 +157,55 @@ octo900.opiInitialize <- function(serverPort=50001,eyeSuiteSettingsLocation=NA, 
     )
 
     assign("socket", socket, envir = .Octopus900Env)
-    msg <- paste0("OPI_INITIALIZE \"",eyeSuiteSettingsLocation,"\"\ ",eye, " ", gazeFeed)
+    msg <- paste0("OPI_INITIALIZE \"",eyeSuiteSettingsLocation,"\"\ ",eye, " ", gazeFeed, " ", buzzer)
     writeLines(msg, socket)
     res <- readLines(socket, n=1)
     
     setupBackgroundConstants()
 
-	if (res == "0")
-		return(NULL)
-	else
-		return(res)
+    if (res == "0")
+        return(NULL)
+    else
+        return(res)
 }
 
 ###########################################################################
 # INPUT: 
 #   As per OPI spec
 #   stim$color must be same as that initialised by opiSetBackground or opiInitialize
+#   If F310 is FALSE, response is taken from internal button 
+#        (sends OPI_PRESENT_STATIC to server)
+#   If F310 is TRUE , response is taken from external controller
+#        (sends OPI_PRESENT_STATIC_F310 to server)
 #
 # Return a list of 
-#	err  = string message
-#	seen = 1 if seen, 0 otherwise
-#	time = reaction time
+#    err  = string message
+#    seen = 1 if seen, 0 otherwise
+#    time = reaction time
 # 
 # If stim is null, always return 0 status.
 ###########################################################################
-octo900.opiPresent <- function(stim, nextStim=NULL) { UseMethod("octo900.opiPresent") }
-setGeneric("octo900.opiPresent")
+octo900.presentStatic <- function(stim, nextStim, F310=FALSE) {
+    if (is.null(stim)) 
+        return(list(err=0))
 
-octo900.opiPresent.opiStaticStimulus <- function(stim, nextStim) {
-    if(min(abs(GOLDMANN - stim$size)) != 0)
+    if(min(abs(.Octopus900Env$GOLDMANN - stim$size), na.rm=TRUE) != 0)
         warning("opiPresent: Rounding stimulus size to nearest Goldmann size")
 
-    msg <- "OPI_PRESENT_STATIC "
-    if (is.null(stim)) {
-        return(list(err=0))
-    } else {
-        msg <- paste(msg, stim$x * 10.0, stim$y * 10.0, cdTodb(stim$level, 4000/pi) * 10.0)
-        msg <- paste(msg, (which.min(abs(GOLDMANN - stim$size))))
-        msg <- paste(msg, stim$duration)
-	      msg <- paste(msg, stim$responseWindow)
-        if (!is.null(nextStim)) {
-            msg <- paste(msg, nextStim$x * 10.0, nextStim$y * 10.0)
-        }
+    if (F310)
+        msg <- "OPI_PRESENT_STATIC_F310 "
+    else
+        msg <- "OPI_PRESENT_STATIC "
+    msg <- paste(msg, stim$x * 10.0, stim$y * 10.0, cdTodb(stim$level, 4000/pi) * 10.0)
+    msg <- paste(msg, (which.min(abs(.Octopus900Env$GOLDMANN - stim$size))))
+    msg <- paste(msg, stim$duration)
+      msg <- paste(msg, stim$responseWindow)
+    if (!is.null(nextStim)) {
+        msg <- paste(msg, nextStim$x * 10.0, nextStim$y * 10.0)
     }
 
     writeLines(msg, .Octopus900Env$socket)
+    #Sys.sleep(1)
     res <- readLines(.Octopus900Env$socket, n=1)
     s <- strsplit(res, "|||", fixed=TRUE)[[1]]
     if (s[1] == "null") {
@@ -208,7 +216,7 @@ octo900.opiPresent.opiStaticStimulus <- function(stim, nextStim) {
 
 
 
-    if (.OpiEnv$gazeFeed==0) {
+    if (.Octopus900Env$gazeFeed==0) {
       return(list(
         err=err,
         seen=strtoi(s[2]),
@@ -222,7 +230,7 @@ octo900.opiPresent.opiStaticStimulus <- function(stim, nextStim) {
 
 
 
-    if (.OpiEnv$gazeFeed==1) {
+    if (.Octopus900Env$gazeFeed==1) {
       return(list(
         err=err,
         seen=strtoi(s[2]),
@@ -236,29 +244,46 @@ octo900.opiPresent.opiStaticStimulus <- function(stim, nextStim) {
 
 
 
-    if (.OpiEnv$gazeFeed==2) {
+    if (.Octopus900Env$gazeFeed==2) {
       #frames <- strsplit(s[14], "###", fixed=TRUE)[[1]]
       #for (i in 1:length(frames)) {
       #  frames[i] <- strtoi(strsplit(frames[i],",",fixed=T)[[1]])
       #}
       return(list(
-	               err=err, 
-	              seen=strtoi(s[2]),
-	              time=strtoi(s[3]),
-	         numFrames=strtoi(s[4]),
-	             times=strtoi(strsplit(s[5],",",fixed=T)[[1]]),
-	               ids=strtoi(strsplit(s[6],",",fixed=T)[[1]]),
-  	           stars=strtoi(strsplit(s[7],",",fixed=T)[[1]]),
-	             rings=strtoi(strsplit(s[8],",",fixed=T)[[1]]),
-	          diamters=strtoi(strsplit(s[9],",",fixed=T)[[1]]),
-   	          pupilX=strtoi(strsplit(s[10],",",fixed=T)[[1]]),
-	            pupilY=strtoi(strsplit(s[11],",",fixed=T)[[1]]),
-	    pupilMajorAxis=strtoi(strsplit(s[12],",",fixed=T)[[1]]),
-	    pupilMinorAxis=strtoi(strsplit(s[13],",",fixed=T)[[1]]),
+                   err=err, 
+                  seen=strtoi(s[2]),
+                  time=strtoi(s[3]),
+             numFrames=strtoi(s[4]),
+                 times=strtoi(strsplit(s[5],",",fixed=T)[[1]]),
+                   ids=strtoi(strsplit(s[6],",",fixed=T)[[1]]),
+                 stars=strtoi(strsplit(s[7],",",fixed=T)[[1]]),
+                 rings=strtoi(strsplit(s[8],",",fixed=T)[[1]]),
+              diamters=strtoi(strsplit(s[9],",",fixed=T)[[1]]),
+                 pupilX=strtoi(strsplit(s[10],",",fixed=T)[[1]]),
+                pupilY=strtoi(strsplit(s[11],",",fixed=T)[[1]]),
+        pupilMajorAxis=strtoi(strsplit(s[12],",",fixed=T)[[1]]),
+        pupilMinorAxis=strtoi(strsplit(s[13],",",fixed=T)[[1]]),
           firstFrame=strtoi(strsplit(s[14],",",fixed=T)[[1]])
-	            #frames=frames
+                #frames=frames
       ))
     }#gazeFeed=2
+}
+
+###########################################################################
+# Set up generic calls based on type of stim
+###########################################################################
+octo900.opiPresent <- function(stim, nextStim=NULL) { UseMethod("octo900.opiPresent") }
+setGeneric("octo900.opiPresent")
+
+octo900.opiPresentF310 <- function(stim, nextStim=NULL) { UseMethod("octo900.opiPresentF310") }
+setGeneric("octo900.opiPresentF310")
+
+octo900.opiPresent.opiStaticStimulus <- function(stim, nextStim) {
+    return(octo900.presentStatic(stim, nextStim, FALSE))
+}
+
+octo900.opiPresentF310.opiStaticStimulus <- function(stim, nextStim) {
+    return(octo900.presentStatic(stim, nextStim, TRUE))
 }
 
  
@@ -268,28 +293,26 @@ octo900.opiPresent.opiStaticStimulus <- function(stim, nextStim) {
 #   stim$color must be same as that initialised by opiSetBackground or opiInitialize
 #
 # Return a list of 
-#	err  = string message
-#	seen = 1 if seen, 0 otherwise
-#	time = reaction time
+#    err  = string message
+#    seen = 1 if seen, 0 otherwise
+#    time = reaction time
 #
 # If stim is null, always return 0 status.
 ###########################################################################
 octo900.opiPresent.opiTemporalStimulus <- function(stim, nextStim=NULL, ...) {
+    if (is.null(stim)) 
+        return(list(err=0))
 
-    if(min(abs(GOLDMANN - stim$size)) != 0)
+    if(min(abs(.Octopus900Env$GOLDMANN - stim$size)) != 0)
         warning("opiPresent: Rounding stimulus size to nearest Goldmann size")
 
     msg <- "OPI_PRESENT_TEMPORAL "
-    if (is.null(stim)) {
-        return(list(err=0))
-    } else {
-        msg <- paste(c(msg, stim$x * 10.0, stim$y * 10.0, stim$rate), collapse=" ")
-        msg <- paste(msg, (which.min(abs(GOLDMANN - stim$size))))
-        msg <- paste(msg, stim$duration)
-        msg <- paste(msg, stim$responseWindow)
-        if (!is.null(nextStim)) {
-            msg <- paste(msg, nextStim$x * 10.0, nextStim$y * 10.0)
-        }
+    msg <- paste(c(msg, stim$x * 10.0, stim$y * 10.0, stim$rate), collapse=" ")
+    msg <- paste(msg, (which.min(abs(.Octopus900Env$GOLDMANN - stim$size))))
+    msg <- paste(msg, stim$duration)
+    msg <- paste(msg, stim$responseWindow)
+    if (!is.null(nextStim)) {
+        msg <- paste(msg, nextStim$x * 10.0, nextStim$y * 10.0)
     }
 
     writeLines(msg, .Octopus900Env$socket)
@@ -320,33 +343,32 @@ octo900.opiPresent.opiTemporalStimulus <- function(stim, nextStim=NULL, ...) {
 # If stim is null, always return 0 status.
 ########################################## 
 octo900.opiPresent.opiKineticStimulus <- function(stim, ...) {
+    if (is.null(stim)) 
+        return(list(err=0))
+
         # convert sizes to GOLDMANN
      stim$sizes <- sapply(stim$sizes, function(s) {
-         i <- which.min(abs(GOLDMANN - s))
-         if(abs(GOLDMANN[i] - s) > 0.000001) {
+         i <- which.min(abs(.Octopus900Env$GOLDMANN - s))
+         if(abs(.Octopus900Env$GOLDMANN[i] - s) > 0.000001) {
              warning(paste("opiPresent: Rounding stimulus size",s,"to nearest Goldmann size"))
          } 
          return(i)
      })
 
     msg <- "OPI_PRESENT_KINETIC "
-    if (is.null(stim)) {
-        return(list(err=0))
-    } else {
-        xs <- xy.coords(stim$path)$x
-        ys <- xy.coords(stim$path)$y
-        msg <- paste(c(msg, length(xs), xs, ys), collapse=" ")
-        msg <- paste(c(msg, sapply(stim$levels, cdTodb, maxStim=4000/pi)), collapse=" ")
-        msg <- paste(c(msg, stim$sizes), collapse=" ")
-        
-          # convert seconds/degree into total time for path segment in seconds
-        pathLengths <- NULL
-        for(i in 2:length(xs)) {
-          d <- sqrt((xs[i]-xs[i-1])^2 + (ys[i]-ys[i-1]^2))
-          stim$speeds[i-1] <- d/stim$speeds[i-1]
-        }
-        msg <- paste(c(msg, stim$speeds), collapse=" ")  
+    xs <- xy.coords(stim$path)$x
+    ys <- xy.coords(stim$path)$y
+    msg <- paste(c(msg, length(xs), xs, ys), collapse=" ")
+    msg <- paste(c(msg, sapply(stim$levels, cdTodb, maxStim=4000/pi)), collapse=" ")
+    msg <- paste(c(msg, stim$sizes), collapse=" ")
+    
+      # convert seconds/degree into total time for path segment in seconds
+    pathLengths <- NULL
+    for(i in 2:length(xs)) {
+      d <- sqrt((xs[i]-xs[i-1])^2 + (ys[i]-ys[i-1]^2))
+      stim$speeds[i-1] <- d/stim$speeds[i-1]
     }
+    msg <- paste(c(msg, stim$speeds), collapse=" ")  
     
     writeLines(msg, .Octopus900Env$socket)
     res <- readLines(.Octopus900Env$socket, n=1)

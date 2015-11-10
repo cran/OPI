@@ -70,7 +70,7 @@ opiInitialise(...)
     \code{display} and \code{maxStim} is as for SimHenson.
 }
 \subsection{Octopus900}{
-    \code{opiInitialize(eyeSuiteSettingsLocation, eye, gazeFeed=0)}
+    \code{opiInitialize(eyeSuiteSettingsLocation, eye, gazeFeed=0, bigWheel=FALSE),buzzer=0}
 
     If the chosen OPI implementation is \code{Octopus900}, then you must 
     specify a directory and the eye to be tested.
@@ -89,6 +89,15 @@ opiInitialise(...)
     which are the frames captured while a static stimulus is displayed. 
     If \code{gazeFeed} is greater than zero, 
     a Java driven window appears containing the live feed from the Octopus 900 gaze camera.
+
+    \code{bigWheel} is \code{FALSE} for a standard Octopus 900 machine. Some research machines
+    are fitted with an alternate aperture wheel that has 24 sizes, which are accessed
+    with \code{bigWheel} is \code{TRUE}. 
+    The mapping from size to 'hole on wheel' is hard coded; see code for
+    details.
+
+    \code{buzzer} is the buzzer volume which can be one 
+     of 0 (no buzzer), 1, 2, or 3 (max volume). The buzzer sounds before each presentation.
 }
 \subsection{Octopus600}{
     \code{opiInitialize(ipAddress, eye, pupilTracking=FALSE, pulsar=FALSE, eyeControl=0)}
@@ -114,17 +123,14 @@ opiInitialise(...)
     }
 }
 \subsection{KowaAP7000}{
-    \code{opiInitialize(ip, port, mode)}
+    \code{opiInitialize(ip, port)}
 
     If the chosen OPI implementation is \code{KowaAP7000}, then you must 
-    specify the IP address and port of the AP 7000, and the mode.
+    specify the IP address and port of the AP-7000 server.
 
-    \code{ipAddress} is the IP address of the AP 7000 as a string.
+    \code{ipAddress} is the IP address of the AP-7000 server as a string.
 
-    \code{port} is the TCP/IP port of the AP 7000 as a number.
-
-    \code{mode} must be either \code{.KowaAP7000Env$MODE_WoW} for white-on-white 
-        perimetry, or \code{.KowaAP7000Env$MODE_BoY} for blue-on-yellow perimetry.
+    \code{port} is the TCP/IP port of the AP-7000 server as a number.
 }
 }
 
@@ -144,6 +150,10 @@ to change the background and stimulus colors.
 Returns NULL if successful, or an Octopus 600 error code
 
 The default background and stimulus setup is to white-on-white perimetry.
+}
+
+\subsection{Kowa AP-7000}{
+Always returns NULL. 
 }
 
 }
@@ -210,9 +220,9 @@ if (!is.null(opiInitialize(
 }
 
 \dontrun{
-    # Set up the Kowa AP 7000
+    # Set up the Kowa AP-7000
 chooseOpi("KowaAP7000")
-if (!is.null(opiInitialize(ip="192.168.1.7", port=44965, mode=.KowaAP7000Env$MODE_WoW)))
+if (!is.null(opiInitialize(ip="192.168.1.7", port=44965)))
     stop("opiInitialize failed")
 }
 }

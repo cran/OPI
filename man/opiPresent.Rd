@@ -114,12 +114,29 @@ the response to a stimuli is always no, hence \code{\link{opiPresent}} always re
 \code{err=NULL}, \code{seen=FALSE}, and \code{time=0}.
 }
 
+\subsection{Octopus900F310}{
+
+\code{opiPresent(stim, nextStim=NULL)}
+
+This functions as for the Octopus900, but responses are 
+taken from the F310 Controller. 
+If the L button is pressed, \code{seen} is set to 1.
+If the R button is pressed, \code{seen} is set to 2.
+If no button is pressed within \code{responseWindow}, then \code{seen} is set to 0.
+}
+
 \subsection{Octopus600}{
 
 \code{opiPresent(stim, nextStim=NULL)}
 
 If the chosen OPI implementation is \code{Octopus600}, then nextStim is ignored. If \code{eyeControl} is non-zero, 
 as set in \code{opiInitialize}, answer codes describing patient state may arise (see \code{answer} field in the Value section).
+}
+
+\subsection{KowaAP7000}{
+
+\code{opiPresent(stim, nextStim=NULL)}
+If the chosen OPI implementation is \code{KowaAP7000}, then nextStim is ignored. 
 }
 
 
@@ -133,7 +150,7 @@ the device (for example, in a projection system with an aperture wheel of
 predefined sizes.) If \code{stim} is \code{NULL}, then \code{err} contains the status of the
 machine.}
 \item{seen }{\code{TRUE} if a response was detected in the allowed
-\code{responseWindow}, \code{FALSE} otherwise.}
+\code{responseWindow}, \code{FALSE} otherwise. (Note, see Octopus900F310 above).}
 \item{time}{The time in milliseconds from the onset (or offset, machine
 specific) of the presentation
 until the response from the subject if \code{seen} is \code{TRUE}. 
@@ -166,10 +183,14 @@ See the parameter \code{gazeFeed} for \code{\link{opiInitialize}} to control wha
     \item 514 = Fast Eye movements during stimulus presentation
   }
 }
-\item{xs}{Only returned for KowaAP7000 and an opiStaticStimulus. 
-          List of x coordinates of pupil during presentation.}
-\item{ys}{Only returned for KowaAP7000 and an opiStaticStimulus. 
-          List of y coordinates of pupil during presentation.}
+\item{pupilX}{Only returned for KowaAP7000 and an opiStaticStimulus. 
+          x-coordinate of centre of pupil in pixels during presentation.}
+\item{pupilY}{Only returned for KowaAP7000 and an opiStaticStimulus. 
+          y-coordinate of centre of pupil in pixels during presentation.}
+\item{purkinjeX}{Only returned for KowaAP7000 and an opiStaticStimulus. 
+          x-coordinate of centre of Purkinje Image in pixels during presentation.}
+\item{purkinjeY}{Only returned for KowaAP7000 and an opiStaticStimulus. 
+          y-coordinate of centre of Purkinje Image in pixels during presentation.}
 \item{x}{Only returned for KowaAP7000 or Octopus900 and an opiKineticStimulus. 
           x coordinate of stimuli when button is pressed.}
 \item{y}{Only returned for KowaAP7000 or Octopus900 and an opiKineticStimulus. 
