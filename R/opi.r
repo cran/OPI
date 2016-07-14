@@ -15,6 +15,7 @@
 # Date: June 2012
 # Modified:    Sep 2014 - added Octopus 600
 #           16 Dec 2014 - added Kowa AP 7000
+#           25 Feb 2016 - added imo
 #
 # Copyright 2012 Andrew Turpin and Jonathan Denniss
 # This program is part of the OPI (http://perimetry.org/OPI).
@@ -32,6 +33,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+packageStartupMessage("OPI version 2.5")
+
 .OpiEnv <- new.env(size=1)
 
 ################################################################################
@@ -39,6 +42,14 @@
 # the opi* functions to index using .OpiEnv$chooser.
 ################################################################################
 opi.implementations <- list(
+    list(
+        name="imo",
+        opiInitialize    = "imo.opiInitialize",
+        opiClose         = "imo.opiClose",
+        opiSetBackground = "imo.opiSetBackground",
+        opiQueryDevice   = "imo.opiQueryDevice",
+        opiPresent       = "imo.opiPresent"
+    ),
     list(
         name="KowaAP7000",
         opiInitialize    = "kowaAP7000.opiInitialize",

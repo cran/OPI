@@ -105,7 +105,8 @@ setupBackgroundConstants <- function() {
 #   eye                      = "right" or "left"
 #   gazeFeed                 = 0 (none), 1 (single frame), 2 (all frames with *)
 #   bigWheel                 = FALSE (standard machine), TRUE for modified apeture wheel
-#   buzzer                   = 0 (no buzzer),1,2, 3 (max volume)
+#   pres_buzzer              = 0 (no buzzer),1,2, 3 (max volume)
+#   resp_buzzer              = 0 (no buzzer),1,2, 3 (max volume)
 #
 #   Both input dirs should INCLUDE THE TRAILING SLASH.
 #
@@ -115,7 +116,8 @@ setupBackgroundConstants <- function() {
 #
 #######################################################################
 octo900.opiInitialize <- function(serverPort=50001,eyeSuiteSettingsLocation=NA, 
-                                  eye=NA, gazeFeed=0, bigWheel=FALSE, buzzer=0) {
+                                  eye=NA, gazeFeed=0, bigWheel=FALSE, pres_buzzer=0, resp_buzzer=0,
+				 zero_dB_is_10000_asb=TRUE) {
     assign("gazeFeed", gazeFeed, envir=.Octopus900Env)
 
     if (!bigWheel) {
@@ -128,8 +130,15 @@ octo900.opiInitialize <- function(serverPort=50001,eyeSuiteSettingsLocation=NA,
         assign("GOLDMANN", GOLDMANN, envir=.Octopus900Env)
     }
 
-    if (is.na(buzzer) || buzzer < 0) buzzer <- 0
-    if (buzzer > 3) buzzer <- 3
+    if (zero_dB_is_10000_asb)
+    	assign("zero_db_in_asb", 10000, envir=.Octopus900Env)
+    else
+    	assign("zero_db_in_asb",  4000, envir=.Octopus900Env)
+
+    if (is.na(pres_buzzer) || pres_buzzer < 0) pres_buzzer <- 0
+    if (is.na(resp_buzzer) || resp_buzzer < 0) resp_buzzer <- 0
+    if (pres_buzzer > 3) pres_buzzer <- 3
+    if (resp_buzzer > 3) resp_buzzer <- 3
 
     cat("Looking for server... ")
     suppressWarnings(tryCatch(    
@@ -157,7 +166,7 @@ octo900.opiInitialize <- function(serverPort=50001,eyeSuiteSettingsLocation=NA,
     )
 
     assign("socket", socket, envir = .Octopus900Env)
-    msg <- paste0("OPI_INITIALIZE \"",eyeSuiteSettingsLocation,"\"\ ",eye, " ", gazeFeed, " ", buzzer)
+    msg <- paste0("OPI_INITIALIZE \"",eyeSuiteSettingsLocation,"\"\ ",eye, " ", gazeFeed, " ", pres_buzzer, " ", resp_buzzer, " ", as.integer(zero_dB_is_10000_asb))
     writeLines(msg, socket)
     res <- readLines(socket, n=1)
     
@@ -196,7 +205,7 @@ octo900.presentStatic <- function(stim, nextStim, F310=FALSE) {
         msg <- "OPI_PRESENT_STATIC_F310 "
     else
         msg <- "OPI_PRESENT_STATIC "
-    msg <- paste(msg, stim$x * 10.0, stim$y * 10.0, cdTodb(stim$level, 4000/pi) * 10.0)
+    msg <- paste(msg, stim$x * 10.0, stim$y * 10.0, cdTodb(stim$level, .Octopus900Env$zero_db_in_asb/pi) * 10.0)
     msg <- paste(msg, (which.min(abs(.Octopus900Env$GOLDMANN - stim$size))))
     msg <- paste(msg, stim$duration)
       msg <- paste(msg, stim$responseWindow)
@@ -359,7 +368,7 @@ octo900.opiPresent.opiKineticStimulus <- function(stim, ...) {
     xs <- xy.coords(stim$path)$x
     ys <- xy.coords(stim$path)$y
     msg <- paste(c(msg, length(xs), xs, ys), collapse=" ")
-    msg <- paste(c(msg, sapply(stim$levels, cdTodb, maxStim=4000/pi)), collapse=" ")
+    msg <- paste(c(msg, sapply(stim$levels, cdTodb, maxStim=.Octopus900Env$zero_db_in_asb/pi)), collapse=" ")
     msg <- paste(c(msg, stim$sizes), collapse=" ")
     
       # convert seconds/degree into total time for path segment in seconds

@@ -87,3 +87,11 @@ OPI 2.3
  - added support for F310 Logitech Controller for responses to static stimuli
  - added buzzer support for O900
  - fixed Kowa kinetic return values
+
+OPI 2.4
+ - added purkinje coordinates to return of opiQueryDevice for Kowa AP7000
+
+OPI 2.5
+ - added imo
+ - added different types of buzzer for Octopus 900
+ - added 4000/10000 as 0 dB choice for Octopus 900

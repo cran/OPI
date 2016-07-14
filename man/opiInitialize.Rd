@@ -70,7 +70,7 @@ opiInitialise(...)
     \code{display} and \code{maxStim} is as for SimHenson.
 }
 \subsection{Octopus900}{
-    \code{opiInitialize(eyeSuiteSettingsLocation, eye, gazeFeed=0, bigWheel=FALSE),buzzer=0}
+    \code{opiInitialize(eyeSuiteSettingsLocation, eye, gazeFeed=0, bigWheel=FALSE,pres_buzzer=0, resp_buzzer=0, zero_dB_is_10000_asb=TRUE)}
 
     If the chosen OPI implementation is \code{Octopus900}, then you must 
     specify a directory and the eye to be tested.
@@ -96,8 +96,13 @@ opiInitialise(...)
     The mapping from size to 'hole on wheel' is hard coded; see code for
     details.
 
-    \code{buzzer} is the buzzer volume which can be one 
-     of 0 (no buzzer), 1, 2, or 3 (max volume). The buzzer sounds before each presentation.
+    If \code{pres_buzzer} is greater than zero, a buzzer will sound with each stimuli presented.
+    If \code{resp_buzzer} is greater than zero, a buzzer will sound with each button press (resposne).
+    The volume can be one of 0 (no buzzer), 1, 2, or 3 (max volume). If both buzzers are more than zero, 
+    the maximum of the two will be used as the volume.
+
+    If \code{zero_dB_is_10000_asb} is \code{TRUE} then 0 dB is taken as 10000 apostilbs, 
+    otherwise 0 dB is taken as 4000 apostilbs.
 }
 \subsection{Octopus600}{
     \code{opiInitialize(ipAddress, eye, pupilTracking=FALSE, pulsar=FALSE, eyeControl=0)}
@@ -132,6 +137,16 @@ opiInitialise(...)
 
     \code{port} is the TCP/IP port of the AP-7000 server as a number.
 }
+\subsection{imo}{
+    \code{opiInitialize(ip, port)}
+
+    If the chosen OPI implementation is \code{imo}, then you must 
+    specify the IP address and port of the imo server.
+
+    \code{ipAddress} is the IP address of the imo server as a string.
+
+    \code{port} is the TCP/IP port of the imo server as a number.
+}
 }
 
 \value{
@@ -154,6 +169,10 @@ The default background and stimulus setup is to white-on-white perimetry.
 
 \subsection{Kowa AP-7000}{
 Always returns NULL. 
+}
+
+\subsection{imo}{
+Always returns NULL. Will \code{stop} if there is an error.
 }
 
 }
@@ -222,8 +241,13 @@ if (!is.null(opiInitialize(
 \dontrun{
     # Set up the Kowa AP-7000
 chooseOpi("KowaAP7000")
-if (!is.null(opiInitialize(ip="192.168.1.7", port=44965)))
-    stop("opiInitialize failed")
+opiInitialize(ip="192.168.1.7", port=44965)
+}
+
+\dontrun{
+    # Set up the imo
+chooseOpi("imo")
+opiInitialize(ip="192.168.1.7", port=44965)
 }
 }
 
