@@ -116,8 +116,9 @@ setupBackgroundConstants <- function() {
 #
 #######################################################################
 octo900.opiInitialize <- function(serverPort=50001,eyeSuiteSettingsLocation=NA, 
-                                  eye=NA, gazeFeed=0, bigWheel=FALSE, pres_buzzer=0, resp_buzzer=0,
-				 zero_dB_is_10000_asb=TRUE) {
+                                  eye=NA, gazeFeed=0, bigWheel=FALSE, 
+                                  pres_buzzer=0, resp_buzzer=0,
+                                 zero_dB_is_10000_asb=TRUE) {
     assign("gazeFeed", gazeFeed, envir=.Octopus900Env)
 
     if (!bigWheel) {
@@ -131,9 +132,9 @@ octo900.opiInitialize <- function(serverPort=50001,eyeSuiteSettingsLocation=NA,
     }
 
     if (zero_dB_is_10000_asb)
-    	assign("zero_db_in_asb", 10000, envir=.Octopus900Env)
+            assign("zero_db_in_asb", 10000, envir=.Octopus900Env)
     else
-    	assign("zero_db_in_asb",  4000, envir=.Octopus900Env)
+            assign("zero_db_in_asb",  4000, envir=.Octopus900Env)
 
     if (is.na(pres_buzzer) || pres_buzzer < 0) pres_buzzer <- 0
     if (is.na(resp_buzzer) || resp_buzzer < 0) resp_buzzer <- 0
@@ -198,6 +199,22 @@ octo900.presentStatic <- function(stim, nextStim, F310=FALSE) {
     if (is.null(stim)) 
         return(list(err=0))
 
+    if (is.null(stim$x)) stop(paste("opiPresent: no x value given in static stim"))
+    if (is.null(stim$y)) stop(paste("opiPresent: no x value given in static stim"))
+    if (is.null(stim$level)) stop(paste("opiPresent: no level value given in static stim"))
+    if (is.null(stim$size)) {
+        warning("opiPresent: no stim size specified. Assuming Goldmann III = 26/60 degrees.")
+        stim$size <- 26/60
+    }
+    if (is.null(stim$duration)) {
+        warning("opiPresent: no stim duration specified. Assuming 200ms.")
+        stim$duration <- 200
+    }
+    if (is.null(stim$responseWindow)) {
+        warning("opiPresent: no stim responseWindow specified. Assuming 1500ms.")
+        stim$responseWindow <- 1500
+    }
+
     if(min(abs(.Octopus900Env$GOLDMANN - stim$size), na.rm=TRUE) != 0)
         warning("opiPresent: Rounding stimulus size to nearest Goldmann size")
 
@@ -205,49 +222,44 @@ octo900.presentStatic <- function(stim, nextStim, F310=FALSE) {
         msg <- "OPI_PRESENT_STATIC_F310 "
     else
         msg <- "OPI_PRESENT_STATIC "
+    
     msg <- paste(msg, stim$x * 10.0, stim$y * 10.0, cdTodb(stim$level, .Octopus900Env$zero_db_in_asb/pi) * 10.0)
     msg <- paste(msg, (which.min(abs(.Octopus900Env$GOLDMANN - stim$size))))
     msg <- paste(msg, stim$duration)
-      msg <- paste(msg, stim$responseWindow)
+    msg <- paste(msg, stim$responseWindow)
     if (!is.null(nextStim)) {
         msg <- paste(msg, nextStim$x * 10.0, nextStim$y * 10.0)
+    } else {
+        msg <- paste(msg, stim$x * 10.0, stim$y * 10.0)
     }
 
     writeLines(msg, .Octopus900Env$socket)
     #Sys.sleep(1)
     res <- readLines(.Octopus900Env$socket, n=1)
     s <- strsplit(res, "|||", fixed=TRUE)[[1]]
-    if (s[1] == "null") {
+    if (s[1] == "0") {
       err <- NULL
     } else {
       err <- s[1]
     }
 
 
-
-    if (.Octopus900Env$gazeFeed==0) {
+    if (.Octopus900Env$gazeFeed == 0) {
       return(list(
         err=err,
-        seen=strtoi(s[2]),
-        time=strtoi(s[3]),
-        frames=NA,
-        numFrames=NA,
-        width=NA,
-        height=NA
+        seen=as.numeric(s[2]),
+        time=as.numeric(s[3])
       ))
     }#gazeFeed=0
 
 
-
-    if (.Octopus900Env$gazeFeed==1) {
+    if (.Octopus900Env$gazeFeed == 1) {
       return(list(
         err=err,
-        seen=strtoi(s[2]),
-        time=strtoi(s[3]),
-        frames=NA,
-        numFrames=NA,
-        width=NA,
-        height=NA
+        seen=as.numeric(s[2]),
+        time=as.numeric(s[3]),
+        pupilX=as.numeric(s[4]),
+        pupilY=as.numeric(s[5])
       ))
     }#gazeFeed=1
 
@@ -256,23 +268,23 @@ octo900.presentStatic <- function(stim, nextStim, F310=FALSE) {
     if (.Octopus900Env$gazeFeed==2) {
       #frames <- strsplit(s[14], "###", fixed=TRUE)[[1]]
       #for (i in 1:length(frames)) {
-      #  frames[i] <- strtoi(strsplit(frames[i],",",fixed=T)[[1]])
+      #  frames[i] <- as.numeric(strsplit(frames[i],",",fixed=T)[[1]])
       #}
       return(list(
                    err=err, 
-                  seen=strtoi(s[2]),
-                  time=strtoi(s[3]),
-             numFrames=strtoi(s[4]),
-                 times=strtoi(strsplit(s[5],",",fixed=T)[[1]]),
-                   ids=strtoi(strsplit(s[6],",",fixed=T)[[1]]),
-                 stars=strtoi(strsplit(s[7],",",fixed=T)[[1]]),
-                 rings=strtoi(strsplit(s[8],",",fixed=T)[[1]]),
-              diamters=strtoi(strsplit(s[9],",",fixed=T)[[1]]),
-                 pupilX=strtoi(strsplit(s[10],",",fixed=T)[[1]]),
-                pupilY=strtoi(strsplit(s[11],",",fixed=T)[[1]]),
-        pupilMajorAxis=strtoi(strsplit(s[12],",",fixed=T)[[1]]),
-        pupilMinorAxis=strtoi(strsplit(s[13],",",fixed=T)[[1]]),
-          firstFrame=strtoi(strsplit(s[14],",",fixed=T)[[1]])
+                  seen=as.numeric(s[2]),
+                  time=as.numeric(s[3]),
+             numFrames=as.numeric(s[4]),
+                 times=as.numeric(strsplit(s[5],",",fixed=T)[[1]]),
+                   ids=as.numeric(strsplit(s[6],",",fixed=T)[[1]]),
+                 stars=as.numeric(strsplit(s[7],",",fixed=T)[[1]]),
+                 rings=as.numeric(strsplit(s[8],",",fixed=T)[[1]]),
+              diamters=as.numeric(strsplit(s[9],",",fixed=T)[[1]]),
+                 pupilX=as.numeric(strsplit(s[10],",",fixed=T)[[1]]),
+                pupilY=as.numeric(strsplit(s[11],",",fixed=T)[[1]]),
+        pupilMajorAxis=as.numeric(strsplit(s[12],",",fixed=T)[[1]]),
+        pupilMinorAxis=as.numeric(strsplit(s[13],",",fixed=T)[[1]]),
+          firstFrame=as.numeric(strsplit(s[14],",",fixed=T)[[1]])
                 #frames=frames
       ))
     }#gazeFeed=2
@@ -312,6 +324,22 @@ octo900.opiPresent.opiTemporalStimulus <- function(stim, nextStim=NULL, ...) {
     if (is.null(stim)) 
         return(list(err=0))
 
+    if (is.null(stim$x)) stop(paste("opiPresent: no x value given in temporal stim"))
+    if (is.null(stim$y)) stop(paste("opiPresent: no x value given in temporal stim"))
+    if (is.null(stim$rate)) stop(paste("opiPresent: no rate value given in temporal stim"))
+    if (is.null(stim$size)) {
+        warning("opiPresent: no stim size specified. Assuming Goldmann III = 26/60 degrees.")
+        stim$size <- 26/60
+    }
+    if (is.null(stim$duration)) {
+        warning("opiPresent: no stim duration specified. Assuming 200ms.")
+        stim$duration <- 200
+    }
+    if (is.null(stim$responseWindow)) {
+        warning("opiPresent: no stim responseWindow specified. Assuming 1500ms.")
+        stim$responseWindow <- 1500
+    }
+
     if(min(abs(.Octopus900Env$GOLDMANN - stim$size)) != 0)
         warning("opiPresent: Rounding stimulus size to nearest Goldmann size")
 
@@ -322,13 +350,15 @@ octo900.opiPresent.opiTemporalStimulus <- function(stim, nextStim=NULL, ...) {
     msg <- paste(msg, stim$responseWindow)
     if (!is.null(nextStim)) {
         msg <- paste(msg, nextStim$x * 10.0, nextStim$y * 10.0)
+    } else {
+        msg <- paste(msg, stim$x * 10.0, stim$y * 10.0)
     }
 
     writeLines(msg, .Octopus900Env$socket)
     res <- readLines(.Octopus900Env$socket, n=1)
     s <- strsplit(res, "|||", fixed=TRUE)[[1]]
 
-    if (s[1] == "null") {
+    if (s[1] == "0") {
       err <- NULL
     } else {
       err <- s[1]
@@ -336,12 +366,8 @@ octo900.opiPresent.opiTemporalStimulus <- function(stim, nextStim=NULL, ...) {
 
     return(list(
         err =err, 
-        seen=strtoi(s[2]),
-        time=strtoi(s[3]),
-        frames=NA,
-        numFrames=NA,
-        width=NA,
-        height=NA
+        seen=as.numeric(s[2]),
+        time=as.numeric(s[3])
     ))
 
 }#opiPresent.opiTemporalStimulus()
@@ -354,6 +380,11 @@ octo900.opiPresent.opiTemporalStimulus <- function(stim, nextStim=NULL, ...) {
 octo900.opiPresent.opiKineticStimulus <- function(stim, ...) {
     if (is.null(stim)) 
         return(list(err=0))
+
+    if (is.null(stim$path)) stop(paste("opiPresent: no path values given in kinetic stim"))
+    if (is.null(stim$sizes)) stop(paste("opiPresent: no sizes values given in kinetic stim"))
+    if (is.null(stim$levels)) stop(paste("opiPresent: no levels values given in kinetic stim"))
+    if (is.null(stim$speeds)) stop(paste("opiPresent: no speeds values given in kinetic stim"))
 
         # convert sizes to GOLDMANN
      stim$sizes <- sapply(stim$sizes, function(s) {
@@ -371,10 +402,10 @@ octo900.opiPresent.opiKineticStimulus <- function(stim, ...) {
     msg <- paste(c(msg, sapply(stim$levels, cdTodb, maxStim=.Octopus900Env$zero_db_in_asb/pi)), collapse=" ")
     msg <- paste(c(msg, stim$sizes), collapse=" ")
     
-      # convert seconds/degree into total time for path segment in seconds
+      # convert degrees/second into total time for path segment in seconds
     pathLengths <- NULL
     for(i in 2:length(xs)) {
-      d <- sqrt((xs[i]-xs[i-1])^2 + (ys[i]-ys[i-1]^2))
+      d <- sqrt((xs[i]-xs[i-1])^2 + (ys[i]-ys[i-1])^2)
       stim$speeds[i-1] <- d/stim$speeds[i-1]
     }
     msg <- paste(c(msg, stim$speeds), collapse=" ")  
@@ -383,18 +414,30 @@ octo900.opiPresent.opiKineticStimulus <- function(stim, ...) {
     res <- readLines(.Octopus900Env$socket, n=1)
     s <- strsplit(res, "|||", fixed=TRUE)[[1]]
 
-    if (s[1] == "null") {
+    if (s[1] == "0") {
       err <- NULL
     } else {
       err <- s[1]
     }
 
+    if (.Octopus900Env$gazeFeed == 1) {
+      return(list(
+        err=err,
+        seen=as.numeric(s[2]),
+        time=as.numeric(s[3]),
+        x=as.numeric(s[4])/1000,
+        y=as.numeric(s[5])/1000,
+        pupilX=as.numeric(s[6]),
+        pupilY=as.numeric(s[7])
+      ))
+    }#gazeFeed=1
+
     return(list(
         err =err, 
-        seen=strtoi(s[2]),
-        time=strtoi(s[3]),
-        x=strtoi(s[4]),     
-        y=strtoi(s[5])
+        seen=as.numeric(s[2]),
+        time=as.numeric(s[3]),
+        x=as.numeric(s[4])/1000,     
+        y=as.numeric(s[5])/1000
     ))
 }
 
@@ -410,14 +453,25 @@ octo900.opiPresent.opiKineticStimulus <- function(stim, ...) {
 # @return -1 if opiInitialize has not been successfully called
 # @return -2 trouble setting backgound color
 # @return -3 trouble setting fixation
+# @return -4 all input parameters NA
 ###########################################################################
-octo900.opiSetBackground <- function(lum="NA", color="NA", fixation="NA", fixIntensity=50) {
+octo900.opiSetBackground <- function(lum=NA, color=NA, fixation=NA, fixIntensity=NA) {
+
+    if (all(is.na(c(lum, color, fixation, fixIntensity)))) {
+        warning("At least one parameter must be not NA in opiSetBackground")
+        return(-4)
+    }
+
+    if (is.na(lum)) lum <- -1 
+    if (is.na(color)) color <- -1 
+    if (is.na(fixation)) fixation <- -1 
+    if (is.na(fixIntensity)) fixIntensity <- -1 
 
     msg <- paste("OPI_SET_BACKGROUND", color, lum, fixation, fixIntensity)
     writeLines(msg, .Octopus900Env$socket)
-    ret <- strtoi(readLines(.Octopus900Env$socket, n=1))
+    ret <- as.numeric(readLines(.Octopus900Env$socket, n=1))
 
-    if (ret == 0) {
+    if (ret == "0") {
         return(NULL)
     } else {
         return(ret)
@@ -444,5 +498,5 @@ octo900.opiQueryDevice <- function() {
       cat("\n")
     })
 
-    return(NULL)
+    return(list(isSim=FALSE))
 }

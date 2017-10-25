@@ -95,3 +95,12 @@ OPI 2.5
  - added imo
  - added different types of buzzer for Octopus 900
  - added 4000/10000 as 0 dB choice for Octopus 900
+
+OPI 2.6
+ - added Compass support
+ - fixed sneaky kinetic speed bug
+
+OPI 2.7
+ - Added Kinetic Stimuli to SimHenson
+ - Updated Compass protocl to The Helsinki Draft
+ - Added MOCS

@@ -16,6 +16,7 @@
 # Modified:    Sep 2014 - added Octopus 600
 #           16 Dec 2014 - added Kowa AP 7000
 #           25 Feb 2016 - added imo
+#           22 Jul 2016 - added Compass
 #
 # Copyright 2012 Andrew Turpin and Jonathan Denniss
 # This program is part of the OPI (http://perimetry.org/OPI).
@@ -42,6 +43,14 @@ packageStartupMessage("OPI version 2.5")
 # the opi* functions to index using .OpiEnv$chooser.
 ################################################################################
 opi.implementations <- list(
+    list(
+        name="Compass",
+        opiInitialize    = "compass.opiInitialize",
+        opiClose         = "compass.opiClose",
+        opiSetBackground = "compass.opiSetBackground",
+        opiQueryDevice   = "compass.opiQueryDevice",
+        opiPresent       = "compass.opiPresent"
+    ),
     list(
         name="imo",
         opiInitialize    = "imo.opiInitialize",
@@ -75,12 +84,12 @@ opi.implementations <- list(
         opiPresent       = "octo900.opiPresentF310"
     ),
     list(
-      name="Octopus600",
-      opiInitialize    = "octo600.opiInitialize",
-      opiClose         = "octo600.opiClose",
-      opiSetBackground = "octo600.opiSetBackground",
-      opiQueryDevice   = "octo600.opiQueryDevice",
-      opiPresent       = "octo600.opiPresent"
+        name="Octopus600",
+        opiInitialize    = "octo600.opiInitialize",
+        opiClose         = "octo600.opiClose",
+        opiSetBackground = "octo600.opiSetBackground",
+        opiQueryDevice   = "octo600.opiQueryDevice",
+        opiPresent       = "octo600.opiPresent"
     ),
     list(
         name="SimNo",
@@ -181,6 +190,7 @@ chooseOpi <- function(opiImplementation) {
         return(TRUE)
     }
 }
+chooseOPI <- chooseOpi
 
 
 ####################################################################################

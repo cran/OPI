@@ -16,12 +16,12 @@ opiSetBackground(...)
 }
 \details{
 \subsection{Octopus900}{ 
-    \code{opiSetBackground(lum, color="white", background=NA, fixation=NA, fixIntensity=50)} 
+    \code{opiSetBackground(lum=NA, color=NA, fixation=NA, fixIntensity=NA)} 
 
     Allowable \code{lum} and \code{color} are defined in the .Octopus900Env environment.
 
     \itemize{
-    \item\code{lum} is intensity of the background and must be one of
+    \item\code{lum} is intensity of the background and can be one of
       \itemize{
         \item \code{.Octopus900Env$BG_OFF}, which turns background off.
         \item \code{.Octopus900Env$BG_1}, background of 1.27 cd/\eqn{\mbox{m}^2}{m^2}.
@@ -84,6 +84,24 @@ This function has no effect.
         \item \code{.KowaAP7000Env$FIX_AUX_LEFT}, fixation marker is as for AUX but only lower left.
     }
 }
+\subsection{Compass}{
+    \code{opiSetBackground(fixation=NA, tracking_on=NA)}
+    \itemize{
+    \item{\code{fixation}=c(x,y,t)} where
+        \itemize{
+        \item{\code{x}} is one of -20, -6, -3, 0, 3, 6, 20 degrees.
+        \item{\code{y}} is 0 degrees.
+        \item{\code{t}} is 0 for a spot fixation marker at \code{c(x,y)}, or 1 for a square 
+            centred on one of \code{(-3,0)}, \code{(0,0)}, \code{(+3,0)}.
+        }
+    \item{\code{tracking_on}} is either 0 (tracking off) or 1 (tracking on).
+    }
+
+Note: tracking will be relative to the PRL established with the fixation marker used at
+setup (call to OPI-OPEN), so when tracking is on you should use the 
+same fixation location as in the setup.
+}
+
 }
 
 \value{
@@ -96,6 +114,8 @@ otherwise an implementation dependant error as follows.
     -2 indicates could not set the background color.
 
     -3 indicates could not set the fixation marker.
+
+    -4 indicates that all input parameters were NA.
 }
 }
 \references{
@@ -104,7 +124,7 @@ A. Turpin, P.H. Artes and A.M. McKendrick
 "The Open Perimetry Interface: An enabling tool for clinical visual psychophysics",
 Journal of Vision 12(11) 2012.
 
-http://perimetry.org/OPI
+http://people.eng.unimelb.edu.au/aturpin/opi/index.html
 }
 \author{
 Andrew Tuprin <aturpin@unimelb.edu.au>

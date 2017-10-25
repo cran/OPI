@@ -3,6 +3,7 @@
 \alias{fourTwo.step}
 \alias{fourTwo.stop}
 \alias{fourTwo.final}
+\alias{fourTwo}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 4-2 Staircase
@@ -120,7 +121,7 @@ Andrew Turpin <aturpin@unimelb.edu.au>
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{dbTocd}}, \code{\link{opiPresent}}
+\code{\link{dbTocd}}, \code{\link{opiPresent}}, \code{\link{FT}}
 }
 \examples{
     # Stimulus is Size III white-on-white as in the HFA

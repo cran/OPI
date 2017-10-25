@@ -90,6 +90,18 @@ The list must contain the following elements.
     placement to keep centred on pupil.
 
 }
+
+\subsection{Compass}{
+    \code{x} and \code{y} are in degrees (floating point) (range [-30,30]).
+
+    \code{level} is in cd/\eqn{\mbox{m}^2}{m^2}, and is rounded to the 
+                nearest whole dB for display (range 0 to 50). 0dB is 10000aps.
+
+    \code{responseWindow} is in millliseconds (range 0 to 2680).
+
+    Parameter \code{duration} is assumed to be 200ms, \code{size} is assumed to be Goldmann III
+    (0.43),  and \code{color} is assumed to be white.
+}
 }
 
 \references{
@@ -98,7 +110,7 @@ A. Turpin, P.H. Artes and A.M. McKendrick
 "The Open Perimetry Interface: An enabling tool for clinical visual psychophysics",
 Journal of Vision 12(11) 2012.
 
-http://perimetry.org/OPI
+http://people.eng.unimelb.edu.au/aturpin/opi/index.html
 }
 
 \author{

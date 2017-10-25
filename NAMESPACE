@@ -8,6 +8,8 @@ export(ZEST.step)
 export(ZEST.stop)
 export(ZEST.final)
 
+export(MOCS)
+
 export(FT)
 export(FT.start)
 export(FT.step)
@@ -21,6 +23,7 @@ export(fourTwo.stop)
 export(fourTwo.final)
 
 export(chooseOpi)
+export(chooseOPI)
 export(dbTocd, cdTodb)
 
 export(opiPresent)
@@ -56,5 +59,6 @@ export(.KowaAP7000Env)
 
 importFrom("grDevices", "dev.cur", "grey", "xy.coords")
 importFrom("graphics", "grid", "par", "plot", "points", "rect")
-importFrom("stats", "pnorm", "runif")
+importFrom("stats", "pnorm", "runif", "rgamma")
 importFrom("utils", "head", "tail")
+importFrom("stats", "approx")
