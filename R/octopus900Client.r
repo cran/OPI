@@ -37,35 +37,34 @@
 
 
 ###################################################################
-# .Octopus900Env$octopusObject is the java Opi object set in opiInitialize
-# .Octopus900Env$... are lots of colors and Fixation constants set in setupBackgroundConstants()
+# .OpiEnv$O900$... are lots of colors and Fixation constants set in setupBackgroundConstants()
 ###################################################################
-if (!exists(".Octopus900Env"))
-    .Octopus900Env <- new.env()
+if (exists(".OpiEnv") && !exists("O900", where=.OpiEnv))
+    assign("O900", new.env(25), envir=.OpiEnv)
 
 ###########################################################################
 # Get values for fixation, color and bg intensity constants
 # from EyeSuite classes, and set globals
-#       .Octopus900Env$* 
+#       .OpiEnv$O900$* 
 # to the values of those constants.
 # INPUT: None.
 # OUTPUT: None.
-# SIDE EFFECTS: sets .Octopus900Env$* if possible.
-#               store the names and values in .Octopus900Env$constList 
+# SIDE EFFECTS: sets .OpiEnv$O900$* if possible.
+#               store the names and values in .OpiEnv$O900$constList 
 ###########################################################################
 setupBackgroundConstants <- function() {
 
     constList <- NULL
 
     getC <- function(cName) {
-        writeLines(paste("OPI_GET_CONSTANT", cName), .Octopus900Env$socket)
-        res <- readLines(.Octopus900Env$socket, n=1)
+        writeLines(paste("OPI_GET_CONSTANT", cName), .OpiEnv$O900$socket)
+        res <- readLines(.OpiEnv$O900$socket, n=1)
         if (res == "OZ900Fail") {
             warning(paste("Cannot set",cName,"constant for the O900."))
         } else {
-            assign(cName, as.double(res), envir = .Octopus900Env) 
-            assign("constList", c(.Octopus900Env$constList, list(list(cName, as.double(res)))), 
-                    envir = .Octopus900Env)
+            assign(cName, as.double(res), envir = .OpiEnv$O900) 
+            assign("constList", c(.OpiEnv$O900$constList, list(list(cName, as.double(res)))), 
+                    envir = .OpiEnv$O900)
         }
     }
 
@@ -77,7 +76,7 @@ setupBackgroundConstants <- function() {
     getC("BG_10")       # 10 cd/m2 == 1000
     getC("BG_100")      # 100 cd/m2 == 10000
 
-    assign("FIX_CENTER", .Octopus900Env$FIX_CENTRE, envir = .Octopus900Env) # help Americans
+    assign("FIX_CENTER", .OpiEnv$O900$FIX_CENTRE, envir = .OpiEnv$O900) # help Americans
 
         # get the color fields from OCTO900
     getC("STIM_WHITE")
@@ -93,9 +92,9 @@ setupBackgroundConstants <- function() {
     getC("MET_COL_WHITE_YELLOW")
     getC("MET_COL_USER")
 
-    assign("MET_COL_BW", .Octopus900Env$MET_COL_BLUE_WHITE,   envir = .Octopus900Env)
-    assign("MET_COL_RY", .Octopus900Env$MET_COL_RED_YELLOW,   envir = .Octopus900Env)
-    assign("MET_COL_WY", .Octopus900Env$MET_COL_WHITE_YELLOW, envir = .Octopus900Env)
+    assign("MET_COL_BW", .OpiEnv$O900$MET_COL_BLUE_WHITE,   envir = .OpiEnv$O900)
+    assign("MET_COL_RY", .OpiEnv$O900$MET_COL_RED_YELLOW,   envir = .OpiEnv$O900)
+    assign("MET_COL_WY", .OpiEnv$O900$MET_COL_WHITE_YELLOW, envir = .OpiEnv$O900)
 }
 
 #######################################################################
@@ -103,7 +102,7 @@ setupBackgroundConstants <- function() {
 #   serverPort               = port number on which server is listening
 #   eyeSuiteSettingsLocation = dir name containing EyeSuite settings
 #   eye                      = "right" or "left"
-#   gazeFeed                 = 0 (none), 1 (single frame), 2 (all frames with *)
+#   gazeFeed                 = NA or a folder name
 #   bigWheel                 = FALSE (standard machine), TRUE for modified apeture wheel
 #   pres_buzzer              = 0 (no buzzer),1,2, 3 (max volume)
 #   resp_buzzer              = 0 (no buzzer),1,2, 3 (max volume)
@@ -116,25 +115,23 @@ setupBackgroundConstants <- function() {
 #
 #######################################################################
 octo900.opiInitialize <- function(serverPort=50001,eyeSuiteSettingsLocation=NA, 
-                                  eye=NA, gazeFeed=0, bigWheel=FALSE, 
+                                  eye=NA, gazeFeed=NA, bigWheel=FALSE, 
                                   pres_buzzer=0, resp_buzzer=0,
                                  zero_dB_is_10000_asb=TRUE) {
-    assign("gazeFeed", gazeFeed, envir=.Octopus900Env)
-
     if (!bigWheel) {
-        assign("GOLDMANN", c(6.5, 13, 26, 52, 104) / 60, envir=.Octopus900Env)
+        assign("GOLDMANN", c(6.5, 13, 26, 52, 104) / 60, envir=.OpiEnv$O900)
     } else {
         mm <- c(0.125,0.25,0.5,1,1.41,2,2.83,4,5.66,8,11.3,16,22.6,32,64,128,256)
         ind <- c(32,28,31,26,30,29,27,24,25,23,21,22,39,38,20,37,36)
         GOLDMANN <- rep(NA,39)
         GOLDMANN[ind] <- (sqrt(mm/pi)*180/pi/149.1954)
-        assign("GOLDMANN", GOLDMANN, envir=.Octopus900Env)
+        assign("GOLDMANN", GOLDMANN, envir=.OpiEnv$O900)
     }
 
     if (zero_dB_is_10000_asb)
-            assign("zero_db_in_asb", 10000, envir=.Octopus900Env)
+            assign("zero_db_in_asb", 10000, envir=.OpiEnv$O900)
     else
-            assign("zero_db_in_asb",  4000, envir=.Octopus900Env)
+            assign("zero_db_in_asb",  4000, envir=.OpiEnv$O900)
 
     if (is.na(pres_buzzer) || pres_buzzer < 0) pres_buzzer <- 0
     if (is.na(resp_buzzer) || resp_buzzer < 0) resp_buzzer <- 0
@@ -165,9 +162,9 @@ octo900.opiInitialize <- function(serverPort=50001,eyeSuiteSettingsLocation=NA,
         socketConnection(host="localhost", serverPort, open = "w+b", blocking = TRUE, timeout = 1000), 
         error=function(e) stop(paste("Cannot connect to Octopus 900 on port", serverPort))
     )
-
-    assign("socket", socket, envir = .Octopus900Env)
-    msg <- paste0("OPI_INITIALIZE \"",eyeSuiteSettingsLocation,"\"\ ",eye, " ", gazeFeed, " ", pres_buzzer, " ", resp_buzzer, " ", as.integer(zero_dB_is_10000_asb))
+    assign("socket", socket, envir = .OpiEnv$O900)
+    msg <- paste0("OPI_INITIALIZE \"",eyeSuiteSettingsLocation,"\"\ ",eye, " ", pres_buzzer, " ", resp_buzzer, " ", as.integer(zero_dB_is_10000_asb))
+    msg <- paste0(msg, " ", ifelse(is.na(gazeFeed) || is.null(gazeFeed), "NA", gazeFeed))
     writeLines(msg, socket)
     res <- readLines(socket, n=1)
     
@@ -214,8 +211,9 @@ octo900.presentStatic <- function(stim, nextStim, F310=FALSE) {
         warning("opiPresent: no stim responseWindow specified. Assuming 1500ms.")
         stim$responseWindow <- 1500
     }
+    if (is.null(stim$color)) stim$color <- .OpiEnv$O900$STIM_WHITE
 
-    if(min(abs(.Octopus900Env$GOLDMANN - stim$size), na.rm=TRUE) != 0)
+    if(min(abs(.OpiEnv$O900$GOLDMANN - stim$size), na.rm=TRUE) > 0.001)
         warning("opiPresent: Rounding stimulus size to nearest Goldmann size")
 
     if (F310)
@@ -223,19 +221,21 @@ octo900.presentStatic <- function(stim, nextStim, F310=FALSE) {
     else
         msg <- "OPI_PRESENT_STATIC "
     
-    msg <- paste(msg, stim$x * 10.0, stim$y * 10.0, cdTodb(stim$level, .Octopus900Env$zero_db_in_asb/pi) * 10.0)
-    msg <- paste(msg, (which.min(abs(.Octopus900Env$GOLDMANN - stim$size))))
+    msg <- paste(msg, stim$x * 10.0, stim$y * 10.0, cdTodb(stim$level, .OpiEnv$O900$zero_db_in_asb/pi) * 10.0)
+    msg <- paste(msg, (which.min(abs(.OpiEnv$O900$GOLDMANN - stim$size))))
     msg <- paste(msg, stim$duration)
     msg <- paste(msg, stim$responseWindow)
+    msg <- paste(msg, stim$color)
     if (!is.null(nextStim)) {
         msg <- paste(msg, nextStim$x * 10.0, nextStim$y * 10.0)
     } else {
         msg <- paste(msg, stim$x * 10.0, stim$y * 10.0)
     }
 
-    writeLines(msg, .Octopus900Env$socket)
+    #print(msg)
+    writeLines(msg, .OpiEnv$O900$socket)
     #Sys.sleep(1)
-    res <- readLines(.Octopus900Env$socket, n=1)
+    res <- readLines(.OpiEnv$O900$socket, n=1)
     s <- strsplit(res, "|||", fixed=TRUE)[[1]]
     if (s[1] == "0") {
       err <- NULL
@@ -243,51 +243,13 @@ octo900.presentStatic <- function(stim, nextStim, F310=FALSE) {
       err <- s[1]
     }
 
-
-    if (.Octopus900Env$gazeFeed == 0) {
-      return(list(
-        err=err,
-        seen=as.numeric(s[2]),
-        time=as.numeric(s[3])
-      ))
-    }#gazeFeed=0
-
-
-    if (.Octopus900Env$gazeFeed == 1) {
-      return(list(
-        err=err,
-        seen=as.numeric(s[2]),
-        time=as.numeric(s[3]),
-        pupilX=as.numeric(s[4]),
-        pupilY=as.numeric(s[5])
-      ))
-    }#gazeFeed=1
-
-
-
-    if (.Octopus900Env$gazeFeed==2) {
-      #frames <- strsplit(s[14], "###", fixed=TRUE)[[1]]
-      #for (i in 1:length(frames)) {
-      #  frames[i] <- as.numeric(strsplit(frames[i],",",fixed=T)[[1]])
-      #}
-      return(list(
-                   err=err, 
-                  seen=as.numeric(s[2]),
-                  time=as.numeric(s[3]),
-             numFrames=as.numeric(s[4]),
-                 times=as.numeric(strsplit(s[5],",",fixed=T)[[1]]),
-                   ids=as.numeric(strsplit(s[6],",",fixed=T)[[1]]),
-                 stars=as.numeric(strsplit(s[7],",",fixed=T)[[1]]),
-                 rings=as.numeric(strsplit(s[8],",",fixed=T)[[1]]),
-              diamters=as.numeric(strsplit(s[9],",",fixed=T)[[1]]),
-                 pupilX=as.numeric(strsplit(s[10],",",fixed=T)[[1]]),
-                pupilY=as.numeric(strsplit(s[11],",",fixed=T)[[1]]),
-        pupilMajorAxis=as.numeric(strsplit(s[12],",",fixed=T)[[1]]),
-        pupilMinorAxis=as.numeric(strsplit(s[13],",",fixed=T)[[1]]),
-          firstFrame=as.numeric(strsplit(s[14],",",fixed=T)[[1]])
-                #frames=frames
-      ))
-    }#gazeFeed=2
+    return(list(
+      err=err,
+      seen=as.numeric(s[2]),
+      time=as.numeric(s[3]),
+      pupilX=ifelse(length(s) > 3, as.numeric(s[4]), NA),
+      pupilY=ifelse(length(s) > 4, as.numeric(s[5]), NA)
+    ))
 }
 
 ###########################################################################
@@ -340,12 +302,12 @@ octo900.opiPresent.opiTemporalStimulus <- function(stim, nextStim=NULL, ...) {
         stim$responseWindow <- 1500
     }
 
-    if(min(abs(.Octopus900Env$GOLDMANN - stim$size)) != 0)
+    if(min(abs(.OpiEnv$O900$GOLDMANN - stim$size)) != 0)
         warning("opiPresent: Rounding stimulus size to nearest Goldmann size")
 
     msg <- "OPI_PRESENT_TEMPORAL "
     msg <- paste(c(msg, stim$x * 10.0, stim$y * 10.0, stim$rate), collapse=" ")
-    msg <- paste(msg, (which.min(abs(.Octopus900Env$GOLDMANN - stim$size))))
+    msg <- paste(msg, (which.min(abs(.OpiEnv$O900$GOLDMANN - stim$size))))
     msg <- paste(msg, stim$duration)
     msg <- paste(msg, stim$responseWindow)
     if (!is.null(nextStim)) {
@@ -354,8 +316,8 @@ octo900.opiPresent.opiTemporalStimulus <- function(stim, nextStim=NULL, ...) {
         msg <- paste(msg, stim$x * 10.0, stim$y * 10.0)
     }
 
-    writeLines(msg, .Octopus900Env$socket)
-    res <- readLines(.Octopus900Env$socket, n=1)
+    writeLines(msg, .OpiEnv$O900$socket)
+    res <- readLines(.OpiEnv$O900$socket, n=1)
     s <- strsplit(res, "|||", fixed=TRUE)[[1]]
 
     if (s[1] == "0") {
@@ -388,8 +350,8 @@ octo900.opiPresent.opiKineticStimulus <- function(stim, ...) {
 
         # convert sizes to GOLDMANN
      stim$sizes <- sapply(stim$sizes, function(s) {
-         i <- which.min(abs(.Octopus900Env$GOLDMANN - s))
-         if(abs(.Octopus900Env$GOLDMANN[i] - s) > 0.000001) {
+         i <- which.min(abs(.OpiEnv$O900$GOLDMANN - s))
+         if(abs(.OpiEnv$O900$GOLDMANN[i] - s) > 0.000001) {
              warning(paste("opiPresent: Rounding stimulus size",s,"to nearest Goldmann size"))
          } 
          return(i)
@@ -399,7 +361,7 @@ octo900.opiPresent.opiKineticStimulus <- function(stim, ...) {
     xs <- xy.coords(stim$path)$x
     ys <- xy.coords(stim$path)$y
     msg <- paste(c(msg, length(xs), xs, ys), collapse=" ")
-    msg <- paste(c(msg, sapply(stim$levels, cdTodb, maxStim=.Octopus900Env$zero_db_in_asb/pi)), collapse=" ")
+    msg <- paste(c(msg, sapply(stim$levels, cdTodb, maxStim=.OpiEnv$O900$zero_db_in_asb/pi)), collapse=" ")
     msg <- paste(c(msg, stim$sizes), collapse=" ")
     
       # convert degrees/second into total time for path segment in seconds
@@ -410,8 +372,8 @@ octo900.opiPresent.opiKineticStimulus <- function(stim, ...) {
     }
     msg <- paste(c(msg, stim$speeds), collapse=" ")  
     
-    writeLines(msg, .Octopus900Env$socket)
-    res <- readLines(.Octopus900Env$socket, n=1)
+    writeLines(msg, .OpiEnv$O900$socket)
+    res <- readLines(.OpiEnv$O900$socket, n=1)
     s <- strsplit(res, "|||", fixed=TRUE)[[1]]
 
     if (s[1] == "0") {
@@ -420,33 +382,23 @@ octo900.opiPresent.opiKineticStimulus <- function(stim, ...) {
       err <- s[1]
     }
 
-    if (.Octopus900Env$gazeFeed == 1) {
-      return(list(
-        err=err,
-        seen=as.numeric(s[2]),
-        time=as.numeric(s[3]),
-        x=as.numeric(s[4])/1000,
-        y=as.numeric(s[5])/1000,
-        pupilX=as.numeric(s[6]),
-        pupilY=as.numeric(s[7])
-      ))
-    }#gazeFeed=1
-
     return(list(
-        err =err, 
-        seen=as.numeric(s[2]),
-        time=as.numeric(s[3]),
-        x=as.numeric(s[4])/1000,     
-        y=as.numeric(s[5])/1000
+      err=err,
+      seen=as.numeric(s[2]),
+      time=as.numeric(s[3]),
+      x=as.numeric(s[4])/1000,
+      y=as.numeric(s[5])/1000,
+      pupilX=ifelse(length(s) > 5, as.numeric(s[6]), NA),
+      pupilY=ifelse(length(s) > 6, as.numeric(s[7]), NA)
     ))
 }
 
 ###########################################################################
 #
-# Input paras are the Octopus900Env$* constants
-# lum is in cd/m^2 (as per OPI spec) * 100 == .Octopus900Env$BG_{OFF | 1 | 10 | 100 }
-# color is .Octopus900Env$MET_COL_{WW | BY | RW | BLUE_WHITE | RED_YELLOW | WHITE_YELLOW }
-# fixation is .Octopus900Env$FIX_{RING | CROSS | CENTRE}
+# Input paras are the OpiEnv$O900$* constants
+# lum is in cd/m^2 (as per OPI spec) * 100 == .OpiEnv$O900$BG_{OFF | 1 | 10 | 100 }
+# color is .OpiEnv$O900$MET_COL_{WW | BY | RW | BLUE_WHITE | RED_YELLOW | WHITE_YELLOW }
+# fixation is .OpiEnv$O900$FIX_{RING | CROSS | CENTRE}
 # fixIntensity is 0..100 %
 #
 # @return NULL is succeed.
@@ -462,14 +414,23 @@ octo900.opiSetBackground <- function(lum=NA, color=NA, fixation=NA, fixIntensity
         return(-4)
     }
 
+    if (!is.na(fixation) && is.na(fixIntensity)) {
+        warning("If fixation is specified, fixIntensity must also be given in opiSetBackground")
+        return(-4)
+    }
+    if (!is.na(fixIntensity) && is.na(fixation)) {
+        warning("If fixIntensity is specified, fixation must also be given in opiSetBackground")
+        return(-4)
+    }
+
     if (is.na(lum)) lum <- -1 
     if (is.na(color)) color <- -1 
     if (is.na(fixation)) fixation <- -1 
     if (is.na(fixIntensity)) fixIntensity <- -1 
 
     msg <- paste("OPI_SET_BACKGROUND", color, lum, fixation, fixIntensity)
-    writeLines(msg, .Octopus900Env$socket)
-    ret <- as.numeric(readLines(.Octopus900Env$socket, n=1))
+    writeLines(msg, .OpiEnv$O900$socket)
+    ret <- as.numeric(readLines(.OpiEnv$O900$socket, n=1))
 
     if (ret == "0") {
         return(NULL)
@@ -482,8 +443,8 @@ octo900.opiSetBackground <- function(lum=NA, color=NA, fixation=NA, fixIntensity
 # return NULL on success (in fact, always!)
 ###########################################################################
 octo900.opiClose <- function() {
-    writeLines("OPI_CLOSE", .Octopus900Env$socket)
-    close(.Octopus900Env$socket)
+    writeLines("OPI_CLOSE", .OpiEnv$O900$socket)
+    close(.OpiEnv$O900$socket)
     return(NULL)
 }
 
@@ -493,7 +454,7 @@ octo900.opiClose <- function() {
 octo900.opiQueryDevice <- function() {
     cat("Defined constants\n")
     cat("-----------------\n")
-    lapply(.Octopus900Env$constList, function(x) {
+    lapply(.OpiEnv$O900$constList, function(x) {
       lapply(x, cat, " ")
       cat("\n")
     })

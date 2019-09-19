@@ -19,12 +19,13 @@ Constant Stimuli test.
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-    \item{params}{A matrix where each row is \code{x y n correct_n ll1 ll2 ... llm}
+    \item{params}{A matrix where each row is \code{x y i n correct_n ll1 ll2 ... llm}
         where
         \itemize{
             \item{\code{x} is X coordinate of location}
             \item{\code{y} is Y coordinate of location}
-            \item{\code{n} is Number of times this location/luminance(s) pair should be repeated}
+            \item{\code{i} is a location number (assigned by caller)}
+            \item{\code{n} is Number of times this location/luminance(s) should be repeated}
 
             \item{\code{correct_n} is the index i of the luminance level (\code{lli}) that
             should be treated as a ``correct'' response (the correct interval).
@@ -81,7 +82,8 @@ Constant Stimuli test.
   \item{makeStim}{
             A helper function to take a row of \code{params} and a response window 
              length in ms, and create a list of OPI stimuli types for 
-             passing to opiPresent. See Example.
+             passing to opiPresent. This may include a \code{checkFixationOK} function.
+             See Example.
     }
 
   \item{stim_print}{A function that takes an \code{opiStaticStimulus} and return list from 
@@ -107,16 +109,24 @@ Constant Stimuli test.
     If a response is received before the final trial in a nIFC experiment,
     it is ignored.
 
+    If the \code{checkFixationOK} funciton is present in a stimulus, then it
+    is called after each presentation, and the result is ``anded'' with each stimulus 
+    in a trial to get a TRUE/FALSE for fixating on all stimuli in a trial.
+
 }
 \value{
- Returns a data.frame with one row per stimulus copied from params with 3 extra columns, 
+ Returns a data.frame with one row per stimulus copied from params with extra columns that
+ are location number in the first column, and the return values from \code{opiPresent()} and a record of fixation (if \code{checkFixationOK} present in stim
+objects returned from \code{makeStim}: see example). These last values will differ depending
+ on which machine/simulation you are running (as chosen with \code{chooseOpi()}.
  \itemize{
         \item{column 1: x}
         \item{column 2: y}
-        \item{...}
-        \item{column last-2: TRUE {correct} or FALSE (incorrect)}
-        \item{column last-1: Response time measured form the final stimulus presentation in ms}
-        \item{column last: Error code as returned from \code{opiPresent}. \code{NA} for no error.}
+        \item{column 3: location number}
+        \item{column 4: correct stimulus index}
+        \item{column 5: TRUE/FALSE was fixating for all presentations in this trial according to \code{checkFixationOK}}
+        \item{column 6...: columns from params}
+        \item{...: columns from opiPresent return}
   }
 }
 
@@ -138,6 +148,10 @@ Andrew Turpin <aturpin@unimelb.edu.au>
 \code{\link{dbTocd}}, \code{\link{opiPresent}}
 }
 \examples{
+    # For the Octopus 900
+    # Check if pupil centre is within 10 pixels of (160,140)
+checkFixationOK <- function(ret) return(sqrt((ret$pupilX - 160)^2 + (ret$pupilY - 140)^2) < 10)
+
     # Return a list of opi stim objects (list of class opiStaticStimulus)
     # for each level (dB) in p[5:length(p)]. Each stim has responseWindow
     # BETWEEN_FLASH_TIME, except the last which has rwin.
@@ -149,7 +163,9 @@ makeStim <- function(p, rwin) {
     for(i in 5:length(p)) {
 
         s <- list(x=p[1], y=p[2], level=dbTocd(p[i],4000/pi), size=0.43, duration=200,
-                  responseWindow=ifelse(i < length(p), BETWEEN_FLASH_TIME, rwin))
+                  responseWindow=ifelse(i < length(p), BETWEEN_FLASH_TIME, rwin),
+                  checkFixationOK=NULL
+                )
         class(s) <- "opiStaticStimulus"
         res <- c(res, list(s))
     }

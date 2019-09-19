@@ -12,7 +12,6 @@ different parameters are available for \code{opiPresent}.
 \usage{
 opiPresent(stim, nextStim=NULL, ...)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{stim}{
     A list of class \code{\link{opiStaticStimulus}}, \code{\link{opiKineticStimulus}}, or
@@ -184,8 +183,19 @@ If the chosen OPI implementation is \code{KowaAP7000}, then \code{nextStim} is i
 
 If the chosen OPI implementation is \code{Compass}, then \code{nextStim} is ignored. 
 Note that the dB level is rounded to the nearest integer.
+
+If tracking is on, then this will block until the tracking is obtained, and the stimulus presented.
 }
 
+\subsection{DayDream}{
+If the chosen OPI implementation is \code{DayDream}, then \code{nextStim} is ignored. 
+Note that the dB level is rounded to the nearest cd/\eqn{\mbox{m}^2}{m^2} that is in the \code{lut} specified in 
+\code{opiInitialise}.
+
+Currently uses the most simple algorithm for drawing a 'circle' (ie not Bresenham's).
+
+Currently only implemented for \code{opiStaticStimulus}.
+}
 
 }
 \value{
@@ -203,17 +213,8 @@ specific) of the presentation
 until the response from the subject if \code{seen} is \code{TRUE}. 
 If \code{seen} is \code{FALSE}, this
 value is undefined.
+For kinetic perimetry on the O900, this value is unknown...
 }
-%\item{frames}{Only returned for Octopus 900 if \code{gazeFeed} is 2. An array of integer 0..255 for gaze image. 
-%In version 1.5, only a single frame is returned.
-%See the parameter \code{gazeFeed} for \code{\link{opiInitialize}} to control what frames are returned.
-%}
-%\item{numFrames}{Only returned for Octopus 900. The number of frames in \code{frames}.
-%}
-%\item{width}{Only returned for Octopus 900. Width of frame in \code{frames}.
-%}
-%\item{height}{Only returned for Octopus 900. Height of frame in \code{frames}.
-%}
 \item{answer}{Only returned for \code{Octopus600}. Can be the following values:
   \itemize{
     \item 0 = stimulus not seen;
@@ -230,9 +231,9 @@ value is undefined.
     \item 514 = Fast Eye movements during stimulus presentation
   }
 }
-\item{pupilX}{Only returned for KowaAP7000 and an opiStaticStimulus or O900 and staic/kinetic if gazeFeed==1. 
+\item{pupilX}{Only returned for KowaAP7000 and an opiStaticStimulus or O900 and staic/kinetic. 
           x-coordinate of centre of pupil in pixels during presentation.}
-\item{pupilY}{Only returned for KowaAP7000 and an opiStaticStimulus or O900 and staic/kinetic if gazeFeed==1. 
+\item{pupilY}{Only returned for KowaAP7000 and an opiStaticStimulus or O900 and staic/kinetic. 
           y-coordinate of centre of pupil in pixels during presentation.}
 \item{purkinjeX}{Only returned for KowaAP7000 and an opiStaticStimulus. 
           x-coordinate of centre of Purkinje Image in pixels during presentation.}

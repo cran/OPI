@@ -27,7 +27,10 @@
 #
 # Input parameters
 #   params  A matrix where each row is 
-#            x y number-of-presentations correct_lum_num luminance-level-1 ll2 ll3 ...
+#           x y loc_num number-of-present'ns correct_lum_num luminance-level-1 ll2 ll3 ...
+#           Each row of params is presented number-of-presentations times in the
+#           order determined by the "order" paramter. For a yes/no MOCS, there is 
+#           only one luminance level. For @AFC, there are two, etc.
 #
 #   order     Control the order in which the stimuli are presented.
 #               "random" - uniform random for all trials.
@@ -59,7 +62,7 @@
 #
 #   makeStim  A helper function to take a row of params[] and a response window 
 #             length in ms, and create a list of OPI stimuli types for 
-#             passing to opiPresent.
+#             passing to opiPresent. Might include checkFixationOK function.
 #
 #   stim_print A function that takes opiStaticStimulus and return list from opiPresent
 #              and returns a string to print.
@@ -67,10 +70,17 @@
 #   ...       Parameters for opiPresent
 #
 # Returns a data.frame with one row per stim, 
-#       col 1 x, col2 y, col 3 correct_lum_num, ncol(params)-1 are same as params[5:],
+#       col 1 Location number (row number in input params matrix)
+#       col 2 x 
+#       col 3 y 
+#       col 4 correct_lum_num 
+#       col 5 true/false all fixations in trial good according to checkFixationOK (TRUE if no checkFixationOK)
+#       ncol(params)-1 are same as params[5:],
 #       column last-2 = correct/incorrect
 #       column last-1 = response time 
 #       column last   = err code
+#
+# Also prints x,y,fixations_good,stim_print(stim, return) for each trial
 ################################################################################
 MOCS <- function(params=NA, 
                  order="random",
@@ -91,7 +101,7 @@ MOCS <- function(params=NA,
     mocs <- NULL
     if (order == "random") {
         for(i in 1:nrow(params)) {
-            reps <- params[i,3]
+            reps <- params[i,4]
             mocs <- rbind(mocs, matrix(params[i,], ncol=ncol(params), nrow=reps, byrow=T))
         }
         mocs <- mocs[order(runif(nrow(mocs))), ]
@@ -100,7 +110,7 @@ MOCS <- function(params=NA,
     } else {
         stop(paste("Invalid order in MOCS: ", order))
     }
-    mocs <- rbind(mocs, rep(0, ncol(params)))  # add dummy for final nextStim
+    mocs <- rbind(mocs, rep(0, ncol(mocs)))  # add dummy for final nextStim
 
         ####################################################
         # Set up response window time data structures
@@ -113,7 +123,8 @@ MOCS <- function(params=NA,
         ####################################################
         # loop through every presentation except last (is dummy)
         ####################################################
-    results <- matrix(NA, nrow=nrow(mocs)-1, ncol=ncol(mocs)-1+3)
+    error_count <- 0
+    results <- NULL
     nextStims <- makeStim(as.double(mocs[1,]), responseFloor)
     for(i in 1:(nrow(mocs)-1)) {
         if (responseWindowMeth == "constant") {
@@ -126,18 +137,33 @@ MOCS <- function(params=NA,
         stims     <- nextStims
         nextStims <- makeStim(as.double(mocs[i+1,]), rwin)
 
-        cat(sprintf('Trial %4g',i))
+        cat(sprintf('Trial,%g,Location,%g',i, mocs[i,3]))
+        all_fixations_good <- TRUE
         for (stimNum in 1:length(stims)) {
             beep_function(stimNum)
-            s = stims[[stimNum]]
+            s <- stims[[stimNum]]
             if (stimNum == length(stims)) {
               ret <- opiPresent(stim=s, nextStim=nextStims[[stimNum]], ...)
-              cat(sprintf(" %+6.1f %+6.1f %s",s$x,s$y,stim_print(s,ret)))
+
+              fixation_good <- TRUE
+              if (!is.null(s$checkFixationOK))
+                fixation_good <- s$checkFixationOK(ret)
+              all_fixations_good <- all_fixations_good && fixation_good
+            
+              cat(sprintf(",%f,%f,%f,",s$x,s$y, fixation_good))
+              cat(stim_print(s,ret))
             } else {
-              startTime = Sys.time()
+              startTime <- Sys.time()
 
               ret <- opiPresent(stim=s, nextStim=NULL, ...)
-              cat(sprintf(" %+6.1f %+6.1f %s",s$x,s$y,stim_print(s,ret)))
+
+              fixation_good <- TRUE
+              if (!is.null(s$checkFixationOK))
+                fixation_good <- s$checkFixationOK(ret)
+              all_fixations_good <- all_fixations_good && fixation_good
+            
+              cat(sprintf(",%f,%f,%f,",s$x,s$y, fixation_good))
+              cat(stim_print(s,ret))
 
                 # just check that the reponse window wasn't scuppered by a response
               while (Sys.time() - startTime < s$responseWindow/1000)
@@ -146,22 +172,30 @@ MOCS <- function(params=NA,
         }
 
         if (responseWindowMeth == "forceKey")
-          ret <- keyHandler(mocs[i, 4], ret)
+          ret <- keyHandler(mocs[i, 6], ret)
  
-        if (ret$seen) 
-            beep_function('correct')
-        else 
-            beep_function('incorrect')
+        if (is.null(ret$err)) {
+            if (ret$seen) 
+                beep_function('correct')
+            else 
+                beep_function('incorrect')
         
-        if (ret$seen && responseWindowMeth == "speed") 
-            respTimeHistory <- c(tail(respTimeHistory, -1), ret$time)
+            if (ret$seen && responseWindowMeth == "speed") 
+                respTimeHistory <- c(tail(respTimeHistory, -1), ret$time)
+        } else {
+            warning("Opi Present return error in MOCS")
+            error_count <- error_count + 1 
+        }
 
-        cat(sprintf(' %5s %6g\n',ret$seen,  ret$time))
+        cat(sprintf(',%g,%g\n',ret$seen,  ret$time))
         
         Sys.sleep(runif(1, min=interStimMin, max=interStimMax)/1000)
 
-        results[i,] <- c(mocs[i,1:3], mocs[i,5:ncol(mocs)], ret$seen, ret$time, ifelse(is.null(ret$err),NA,ret$err))
+        results <- rbind(results, c(mocs[i,1:5], all_fixations_good, mocs[i,6:ncol(mocs)], ret))
     }
+    
+    if (error_count > 0)
+        warning(paste("There were", error_count, "Opi Present return errors in MOCS"))
     
     return(results)
 }#MOCS()
@@ -190,7 +224,9 @@ MOCS <- function(params=NA,
 ###    for(i in 5:length(p)) {
 ###
 ###        s <- list(x=p[1], y=p[2], level=p[5], size=0.43, duration=200,
-###                  responseWindow=ifelse(i < length(p), 0, BETWEEN_FLASH_TIME))
+###                  responseWindow=ifelse(i < length(p), 0, BETWEEN_FLASH_TIME),
+###                  checkFixationOK=NULL
+###             )
 ###        class(s) <- "opiStaticStimulus"
 ###        res <- c(res, list(s))
 ###    }
