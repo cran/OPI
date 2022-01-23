@@ -44,6 +44,7 @@ if (exists(".OpiEnv") && !exists("Compass", where=.OpiEnv)) {
     .OpiEnv$Compass$MAX_Y  <- 30  
     .OpiEnv$Compass$MIN_RESP_WINDOW  <- 0    
     .OpiEnv$Compass$MAX_RESP_WINDOW  <- 2680
+    .OpiEnv$Compass$MIN_DURATION  <- 1
 
     .OpiEnv$Compass$SEEN     <- 1  
     .OpiEnv$Compass$NOT_SEEN <- 0  
@@ -73,6 +74,43 @@ if (exists(".OpiEnv") && !exists("Compass", where=.OpiEnv)) {
 #       prl c(x,y) of PRL
 #       image retinal image as a jpeg in raw bytes
 #######################################################################
+#' @rdname opiInitialize
+#' @param ip ip address on which server is listening
+#' @param port port number on which server is listening
+#' @details
+#' \subsection{Compass}{
+#'   \code{opiInitialize(ip, port)}
+#'   
+#'   If the chosen OPI implementation is \code{Compass}, then you must specify
+#'   the IP address and port of the Compass server.
+#'   
+#'   \itemize{
+#'     \item\code{ip} is the IP address of the Compass server as a string.
+#'     \item\code{port} is the TCP/IP port of the Compass server as a number.
+#'   }
+#'   Warning: this returns a list, not a single error code.
+#' }
+#' @return
+#' \subsection{Compass}{
+#'   Returns a list with elements:
+#'   \itemize{
+#'     \item{err} NULL if successful, not otherwise.
+#'     \item{prl} a pair giving the (x,y) in degrees of the Preferred Retinal
+#'       Locus detected in the initial alignment.
+#'     \item{onh} a pair giving the (x,y) in degrees of the ONH as selected by
+#'     the user.
+#'     \item{image} raw bytes being the JPEG compressed infra-red image acquired
+#'     during alignment.
+#'   }
+#' }
+#' @examples
+#' \dontrun{
+#'   # Set up the Compass
+#'   chooseOpi("Compass")
+#'   result <- opiInitialize(ip="192.168.1.7", port=44965)
+#'   if (is.null(result$err))
+#'     print(result$prl)
+#' }
 compass.opiInitialize <- function(ip="192.168.1.2", port=44965) {
     cat("Looking for server... ")
     suppressWarnings(tryCatch(    
@@ -115,21 +153,37 @@ compass.opiInitialize <- function(ip="192.168.1.2", port=44965) {
 }
 
 ###########################################################################
-# INPUT: 
-#   As per OPI spec
-#
-# Return a list of 
-#    err             : (integer) 0 all clear, >= 1 some error codes (eg cannot track, etc)
-#    seen            : 0 for not seen, 1 for seen (button pressed in response window)
-#    time            : in ms (integer) (does this include/exclude the 200ms presentation time?) -1 for not seen.
-#    time_rec        : time since epoch when command was received at Compass (integer ms)
-#    time_pres       : time since epoch that stimulus was presented (integer ms)
-#    num_track_events: number of tracking events that occurred during presentation (integer)
-#    num_motor_fails : number of times motor could not follow fixation movement during presentation (integer)
-#    pupil_diam      : pupil diameter in mm (float)    
-#    loc_x           : pixels integer, location in image of presentation
-#    loc_y           : pixels integer, location in image of presentation
 ###########################################################################
+#' @rdname opiPresent
+#' @param stim a list of class \code{\link{opiStaticStimulus}},
+#'             \code{\link{opiKineticStimulus}}, or \code{\link{opiTemporalStimulus}} to be presented.
+#' @param nextStim unused - included for compliance with OPI standard.
+#' @details
+#' \subsection{Compass}{
+#'   \code{opiPresent(stim, nextStim=NULL)}
+#'   
+#'   If the chosen OPI implementation is \code{Compass}, then \code{nextStim}
+#'   is ignored. Note that the dB level is rounded to the nearest integer.
+#'   
+#'   If tracking is on, then this will block until the tracking is obtained,
+#'   and the stimulus presented.
+#' }
+#' @return
+#' \subsection{Compass}{
+#'  A list containing
+#'  \itemize{
+#'    \item{err}{0 all clear, >= 1 some error codes (eg cannot track, etc) (integer)}
+#'    \item{seen}{\code{FALSE} for not seen, \code{TRUE} for seen (button pressed in response window)}
+#'    \item{time}{response time in ms (integer) since stimulus onset, -1 for not seen}
+#'    \item{time_rec}{time since epoch when command was received at Compass (integer ms)}
+#'    \item{time_pres}{time since epoch that stimulus was presented (integer ms)}
+#'    \item{num_track_events}{number of tracking events that occurred during presentation (integer)}
+#'    \item{num_motor_fails}{number of times motor could not follow fixation movement during presentation (integer)}
+#'    \item{pupil_diam}{pupil diameter in mm (float)}
+#'    \item{loc_x}{pixels integer, location in image of presentation (integer)}
+#'    \item{loc_y}{pixels integer, location in image of presentation (integer)}
+#'  }
+#' }
 compass.opiPresent <- function(stim, nextStim=NULL) { UseMethod("compass.opiPresent") }
 setGeneric("compass.opiPresent")
 
@@ -141,12 +195,12 @@ compass.opiPresent.opiStaticStimulus <- function(stim, nextStim) {
 
     if(!is.null(stim$size)) warning("opiPresent: ignoring stimulus size")
     if(!is.null(stim$color)) warning("opiPresent: ignoring stimulus color")
-    if(!is.null(stim$duration)) warning("opiPresent: ignoring stimulus duration")
 
     .OpiEnv$Compass$minCheck(stim$x, .OpiEnv$Compass$MIN_X, "Stimulus x")
     .OpiEnv$Compass$maxCheck(stim$x, .OpiEnv$Compass$MAX_X, "Stimulus x")
     .OpiEnv$Compass$minCheck(stim$y, .OpiEnv$Compass$MIN_Y, "Stimulus y")
     .OpiEnv$Compass$maxCheck(stim$y, .OpiEnv$Compass$MAX_Y, "Stimulus y")
+    .OpiEnv$Compass$minCheck(stim$duration, .OpiEnv$Compass$MIN_DURATION, "Stimulus duration")
     .OpiEnv$Compass$minCheck(stim$responseWindow, .OpiEnv$Compass$MIN_RESP_WINDOW, "Stimulus responseWindow")
     .OpiEnv$Compass$maxCheck(stim$responseWindow, .OpiEnv$Compass$MAX_RESP_WINDOW, "Stimulus responseWindow")
     lev <- round(cdTodb(stim$level, .OpiEnv$Compass$ZERO_DB_IN_ASB/pi),0)
@@ -157,7 +211,7 @@ compass.opiPresent.opiStaticStimulus <- function(stim, nextStim) {
         warning("opiPresent: nextStim ignored")
 
     msg <- "OPI-PRESENT-STATIC"
-    msg <- paste(msg, stim$x, stim$y, lev, "3", 200, stim$responseWindow)
+    msg <- paste(msg, stim$x, stim$y, lev, "3", stim$duration, stim$responseWindow)
 
     presentBad <- TRUE
     presentCount <- 0
@@ -200,16 +254,36 @@ compass.opiPresent.opiKineticStimulus <- function(stim, ...) {
 }
 
 ###########################################################################
-# Not supported on AP 7000
+# Not supported on Compass
 ###########################################################################
 compass.opiPresent.opiTemporalStimulus <- function(stim, nextStim=NULL, ...) {
     warning("Compass does not support temporal stimuli (yet)")
     return(list(err="Compass does not support temporal stimuli (yet)", seen=FALSE, time=0))
 }#opiPresent.opiTemporalStimulus()
 
-###########################################################################
-# Used to turn tracking on or off or alter fixation.
-###########################################################################
+#' @rdname opiSetBackground
+#' @param tracking_on \code{TRUE} for tracking on, \code{FALSE} for off
+#' @details
+#' \subsection{Compass}{
+#'   \code{opiSetBackground(fixation=NA, tracking_on=NA)}
+#'   \itemize{
+#'     \item{\code{fixation}=c(x,y,t)} where
+#'     \itemize{
+#'       \item{\code{x}} is one of -20, -6, -3, 0, 3, 6, 20 degrees.
+#'       \item{\code{y}} is 0 degrees.
+#'       \item{\code{t}} is 0 for a spot fixation marker at \code{c(x,y)}, or 1 for a
+#'         square centred on one of \code{(-3,0)}, \code{(0,0)}, \code{(+3,0)}.
+#'     }
+#'     \item{\code{tracking_on}} is either 0 (tracking off) or 1 (tracking on).
+#'   }
+#'   Note: tracking will be relative to the PRL established with the fixation
+#'   marker used at setup (call to OPI-OPEN), so when tracking is on you should
+#'   use the same fixation location as in the setup.
+#' }
+#' @return
+#' \subsection{Compass}{ 
+#'   A list contining \code{error} which is \code{NULL} for success, or some string description for fail.
+#' }
 compass.opiSetBackground <- function(lum=NA, color=NA, fixation=NA, tracking_on=NA) {
     if (!is.na(lum) || !is.na(color))
         warning("opiSetBackground: Compass does not support setting background color or luminance.")
@@ -267,6 +341,15 @@ compass.opiSetBackground <- function(lum=NA, color=NA, fixation=NA, tracking_on=
 #       col-2 x in degrees 
 #       col-3 y in degrees 
 ###########################################################################
+#' @rdname opiClose
+#' @return
+#' \subsection{Compass}{
+#'   Returns a list of \code{err}, which is an error code, and \code{fixations},
+#'   which is a matrix with three columns: \code{time} (same as \code{time_hw}
+#'   in \code{opiPresent}), \code{x} (degrees relative to the centre of the image
+#'   returned by \code{opiInitialise} - not the PRL), \code{y} (as for x), and one row
+#'   per fixation.
+#' }
 compass.opiClose <- function() {
     writeLines("OPI-CLOSE", .OpiEnv$Compass$socket)
 
@@ -293,6 +376,15 @@ compass.opiClose <- function() {
 ###########################################################################
 # Lists defined constants
 ###########################################################################
+#' @rdname opiQueryDevice
+#' @details
+#' \subsection{Compass}{
+#'   Return a list of all the constants used in the OPI Compass module.
+#' }
+#' @return
+#' \subsection{Compass}{
+#'   A list containing constants and their valuse used in the OPI Compass module.
+#' }
 compass.opiQueryDevice <- function() {
-    return(list(default="Nothing to report", isSim=FALSE))
+    return(lapply(ls(.OpiEnv$Compass), function(v) c(as.character(v), get(v, .OpiEnv$Compass))))
 }

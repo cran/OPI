@@ -29,7 +29,7 @@ simNo.opiQueryDevice   <- function() { return (list(type="SimNo", isSim=TRUE)) }
 #
 # Return NULL if succesful, string error message otherwise  
 ################################################################################
-simNo.opiInitialize <- function(display=NULL) {
+simNo.opiInitialize <- function(display = NA) {
     if(simDisplay.setupDisplay(display))
         warning("opiInitialize (SimNo): display parameter may not contain 4 numbers.")
     return(NULL)
@@ -41,14 +41,26 @@ simNo.opiInitialize <- function(display=NULL) {
 #   NULL - succsess
 #   -1   - opiInitialize not called
 ################################################################################
+#' @rdname opiSetBackground
+#' @details
+#' \subsection{SimNo}{
+#'   DETAILS
+#' }
 simNo.opiSetBackground <- function(col, gridCol) { 
     return (simDisplay.setBackground(col, gridCol))
 }
 
-################################################################################
-#
-################################################################################
-simNo.opiPresent <- function(stim) {
+#' @rdname opiPresent
+#' @details
+#' \subsection{SimNo}{
+#' 
+#'   \code{opiPresent(stim, nextStim=NULL)}
+#' 
+#'   If the chosen OPI implementation is \code{SimNo}, then the response to a
+#'   stimuli is always no, hence \code{\link{opiPresent}} always returns
+#'   \code{err=NULL}, \code{seen=FALSE}, and \code{time=0}.
+#' }
+simNo.opiPresent <- function(stim, nextStim=NULL) {
     simDisplay.present(stim$x, stim$y, stim$color, stim$duration, stim$responseWindow)
 
     return ( list(
