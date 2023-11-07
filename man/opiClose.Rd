@@ -67,18 +67,22 @@ DETAILS
 }
 
 \subsection{Octopus600}{
-DETAILS
+
+Always returns NULL
 }
 
 \subsection{Octopus900}{
+
 Returns NULL.
 }
 
 \subsection{PhoneHMD}{
+
 Closes the socket connection with the PhoneHMD
 }
 
 \subsection{SimGaussian}{
+
 DETAILS
 }
 }

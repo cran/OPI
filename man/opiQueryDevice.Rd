@@ -50,22 +50,22 @@ A list containing constants and their valuse used in the OPI Compass module.
 }
 
 \subsection{Octopus600}{
+
 Returns a list of 10 items:
-\enumerate{
-\item answerButton \{0 = not pressed, 1 = pressed \}
-\item headSensor \{0 = no forehead detected, 1 = forehead detected \}
-\item eyeLidClosureLeft \{0 = eye is open, 1 = eye is closed\}
-\item eyeLidClosureRight \{0 = eye is open, 1 = eye is closed\}
-\item fixationLostLeft \{1 = eye pos lost, 0 = eye pos ok\}
-\item fixationLostRight \{1 = eye pos lost, 0 = eye pos ok\}
-\item pupilPositionXLeft (in px)
-\item pupilPositionYLeft (in px)
-\item pupilPositionXRight (in px)
-\item pupilPositionYRight (in px)
-}
+* \code{answerButton} \{0 = not pressed, 1 = pressed \}
+* \code{headSensor} \{0 = no forehead detected, 1 = forehead detected \}
+* \code{eyeLidClosureLeft} \{0 = eye is open, 1 = eye is closed\}
+* \code{eyeLidClosureRight} \{0 = eye is open, 1 = eye is closed\}
+* \code{fixationLostLeft} \{1 = eye pos lost, 0 = eye pos ok\}
+* \code{fixationLostRight} \{1 = eye pos lost, 0 = eye pos ok\}
+* \code{pupilPositionXLeft} (in px)
+* \code{pupilPositionYLeft} (in px)
+* \code{pupilPositionXRight} (in px)
+* \code{pupilPositionYRight} (in px)
 }
 
 \subsection{Octopus900}{
+
 list containing \code{isSim=FALSE}.
 }
 }
@@ -91,12 +91,11 @@ Returns all constants in \code{.OpiEnv$DayDream} as a list.
 \subsection{Daydream}{
 DETAILS
 }
-
-\subsection{KowaAP7000}{
+}
+\section{KowaAP7000}{
 If the chosen OPI is \code{KowaAP7000}, then this function returns the current
 location of the pupil. See the Value section for details.
-}
-\subsection{KowaAP7000}{
+
 Returns a list of 4 items:
 \itemize{
 \item \code{pupilX}, the x-coordinate of the pupil position in pixels.
@@ -104,25 +103,23 @@ Returns a list of 4 items:
 \item \code{purkinjeX}, the x-coordinate of the purkinje position in pixels.
 \item \code{purkinjeY}, the y-coordinate of the purkinje position in pixels.
 }
+
 It also prints a list of constants that OPI knows about for the AP-7000.
 }
 
-\subsection{Octopus600}{
+\section{Octopus600}{
 If the chosen OPI is \code{Octopus600}, then this function returns
 information about the patient. See the Value section for details.
 }
 
-\subsection{Octopus900}{
+\section{Octopus900}{
 Prints defined constants in OPI package pertaining to Octopus 900.
 }
 
-\subsection{PhoneHMD}{
+\section{PhoneHMD}{
 Returns all constants in \code{.OpiEnv$PhoneHMD} as a list.
 }
-\subsection{PhoneHMD}{
-Returns all constants in \code{.OpiEnv$PhoneHMD} as a list.
-}
-}
+
 \examples{
 chooseOpi("SimGaussian")
 if (!is.null(opiInitialize(sd=2)))

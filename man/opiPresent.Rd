@@ -91,90 +91,89 @@ simYes.opiPresent(stim, nextStim = NULL)
 }
 \value{
 A list containing
-\item{err }{\code{NULL} if no error occurred, otherwise a
-machine-specific error message.
-
+\itemize{
+\item \code{err} \code{NULL} if no error occurred, otherwise a machine-specific error message.
 This should include errors when the specified size cannot be achieved by
 the device (for example, in a projection system with an aperture wheel of
 predefined sizes.) If \code{stim} is \code{NULL}, then \code{err} contains
-the status of the machine.}
-\item{seen }{\code{TRUE} if a response was detected in the allowed
+the status of the machine.
+\item \code{seen} \code{TRUE} if a response was detected in the allowed
 \code{responseWindow}, \code{FALSE} otherwise. (Note, see
-Octopus900F310 above).}
-\item{time}{The time in milliseconds from the onset (or offset,
+Octopus900F310 above).
+\item \code{time} The time in milliseconds from the onset (or offset,
 machine-specific) of the presentation until the response from the subject
-if \code{seen} is \code{TRUE}.
+if \code{seen} is \code{TRUE}. If \code{seen} is \code{FALSE}, this value is undefined.
+For kinetic perimetry on the O900, this value is unknown... (what does this mean!?)
+}
+\subsection{O600}{
 
-If \code{seen} is \code{FALSE}, this value is undefined.
-
-For kinetic perimetry on the O900, this value is unknown...}
-\item{answer}{Only returned for \code{Octopus600}. Can be the following values:
+\code{answer} only returned for \code{Octopus600}. Can be the following values:
 \itemize{
 \item 0 = stimulus not seen;
 \item 1 = stimulus seen;
-\item 132 = Response button was pressed before stimulus presentation
-(Patient needs a break - hold on examination);
+\item 132 = Response button was pressed before stimulus presentation (Patient needs a break - hold on examination);
 \item 36 = Eye is closed before stimulus presentation;
-\item 68 = Fixation lost before stimulus presentation (pupil center is
-out of green window in video image);
+\item 68 = Fixation lost before stimulus presentation (pupil center is out of green window in video image);
 \item 260 = Forehead rest lost before stimulus presentation;
 \item 516 = Fast Eye movements before stimulus presentation;
 \item 258 = Forehead rest lost during stimulus presentation;
-\item 66 = Fixation lost during stimulus presentation (pupil center is
-out of green window in video image);
+\item 66 = Fixation lost during stimulus presentation (pupil center is out of green window in video image);
 \item 34 = Eye was closed during stimulus presentation;
-\item 18 = Patient answer was too early (<=100ms after stimulus
-presentation) - lucky punch;
+\item 18 = Patient answer was too early (<=100ms after stimulus presentation) - lucky punch;
 \item 514 = Fast Eye movements during stimulus presentation
-}}
-\item{pupilX}{Only returned for KowaAP7000 (in pixels) and an
-opiStaticStimulus or O900 (in degrees) and staic/kinetic if gazeFeed==1.
-x-coordinate of centre of pupil during presentation.}
-\item{pupilY}{Only returned for KowaAP7000 (in pixels) and an
-opiStaticStimulus or O900 (in degrees) and static/kinetic if gazeFeed==1.
-y-coordinate of centre of pupil during presentation.}
-\item{purkinjeX}{Only returned for KowaAP7000 and an opiStaticStimulus.
-x-coordinate of centre of Purkinje Image in pixels during presentation.}
-\item{purkinjeY}{Only returned for KowaAP7000 and an opiStaticStimulus.
-y-coordinate of centre of Purkinje Image in pixels during presentation.}
-\item{x}{Only returned for KowaAP7000 or Octopus900 and an
-opiKineticStimulus. x coordinate of stimuli when button is pressed.}
-\item{y}{Only returned for KowaAP7000 or Octopus900 and an
-opiKineticStimulus. y coordinate of stimuli when button is pressed.}
-\item{time_rec}{Only returned for Compass. Time since epoch that the
-opiPresent command was received by the Compass in ms.}
-\item{time_hw}{Only returned for Compass. Hardware time of button press or
-response window expired (integer ms).
+}
+}
 
-To get the hardware time that a presentation began, subtract
-responseWindow from \code{th} (for aligning with fixation data returned
-by \code{opiClose()}.}
-\item{time_resp}{Only returned for Compass. Time since epoch that the
-response was received or response window expired (in ms).}
-\item{num_track_events}{Only returned for Compass. The number of tracking
-events associated with this presentation.}
-\item{num_motor_fails}{Only returned for Compass. The number of time the
-motor could not keep pace with eye movements.}
-\item{pupil_diam}{Only returned for Compass. The diameter of the pupil on
-milimetres on presentation.}
-\item{loc_x}{Only returned for Compass. The x location in pixels of the
-presentation on the retinal image returned by \code{opiInitialize}.}
-\item{loc_y}{Only returned for Compass. The y location in pixels of the
-presentation on the retinal image returned by \code{opiInitialize}.}
+\subsection{Kowa AP7000}{
+\itemize{
+\item \code{pupilX} Only returned for KowaAP7000 (in pixels) and an
+opiStaticStimulus or O900 (in degrees) and static/kinetic if gazeFeed==1.
+x-coordinate of centre of pupil during presentation.
+\item \code{pupilY} Only returned for KowaAP7000 (in pixels) and an
+opiStaticStimulus or O900 (in degrees) and static/kinetic if gazeFeed==1.
+y-coordinate of centre of pupil during presentation.
+\item \code{purkinjeX} Only returned for KowaAP7000 and an opiStaticStimulus.  x-coordinate of centre of Purkinje Image in pixels during presentation.
+\item \code{purkinjeY} Only returned for KowaAP7000 and an opiStaticStimulus.  y-coordinate of centre of Purkinje Image in pixels during presentation.
+}
+}
+
+\subsection{Kowa AP7000 and Octopus O900}{
+\itemize{
+\item \code{x} Only returned for KowaAP7000 or Octopus900 and an opiKineticStimulus. x coordinate of stimuli when button is pressed.
+\item \code{y} Only returned for KowaAP7000 or Octopus900 and an opiKineticStimulus. y coordinate of stimuli when button is pressed.
+}
+}
 
 \subsection{Compass}{
+\itemize{
+\item \code{time_rec} Time since epoch that the opiPresent command was received by the Compass in ms.
+\item \code{time_hw} Hardware time of button press or response window expired (integer ms).
+To get the hardware time that a presentation began, subtract
+responseWindow from \code{th} (for aligning with fixation data returned
+by \code{opiClose()}.
+\item \code{time_resp} Time since epoch that the response was received or response window expired (in ms).
+\item \code{num_track_events} The number of tracking events associated with this presentation.
+\item \code{num_motor_fails} The number of time the motor could not keep pace with eye movements.
+\item \code{pupil_diam} The diameter of the pupil on millimeters on presentation.
+\item \code{loc_x} The x location in pixels of the presentation on the retinal image returned by \code{opiInitialize}.
+\item \code{loc_y} The y location in pixels of the presentation on the retinal image returned by \code{opiInitialize}.
+}
+}
+
+\subsection{Compass}{
+
 A list containing
 \itemize{
-\item{err}{0 all clear, >= 1 some error codes (eg cannot track, etc) (integer)}
-\item{seen}{\code{FALSE} for not seen, \code{TRUE} for seen (button pressed in response window)}
-\item{time}{response time in ms (integer) since stimulus onset, -1 for not seen}
-\item{time_rec}{time since epoch when command was received at Compass (integer ms)}
-\item{time_pres}{time since epoch that stimulus was presented (integer ms)}
-\item{num_track_events}{number of tracking events that occurred during presentation (integer)}
-\item{num_motor_fails}{number of times motor could not follow fixation movement during presentation (integer)}
-\item{pupil_diam}{pupil diameter in mm (float)}
-\item{loc_x}{pixels integer, location in image of presentation (integer)}
-\item{loc_y}{pixels integer, location in image of presentation (integer)}
+\item \code{err} 0 all clear, >= 1 some error codes (eg cannot track, etc) (integer)
+\item \code{seen} \code{FALSE} for not seen, \code{TRUE} for seen (button pressed in response window)
+\item \code{time} response time in ms (integer) since stimulus onset, -1 for not seen
+\item \code{time_rec} time since epoch when command was received at Compass (integer ms)
+\item \code{time_pres} time since epoch that stimulus was presented (integer ms)
+\item \code{num_track_events} number of tracking events that occurred during presentation (integer)
+\item \code{num_motor_fails} number of times motor could not follow fixation movement during presentation (integer)
+\item \code{pupil_diam} pupil diameter in mm (float)
+\item \code{loc_x} pixels integer, location in image of presentation (integer)
+\item \code{loc_y} pixels integer, location in image of presentation (integer)
 }
 }
 }
@@ -198,16 +197,6 @@ is not, I think).
 Also note that to allow for different parameters depending on the
 implementation chosen with \code{chooseOpi}, every parameter MUST be named in
 a call to \code{\link{opiPresent}}.
-
-\subsection{Compass}{
-\code{opiPresent(stim, nextStim=NULL)}
-
-If the chosen OPI implementation is \code{Compass}, then \code{nextStim}
-is ignored. Note that the dB level is rounded to the nearest integer.
-
-If tracking is on, then this will block until the tracking is obtained,
-and the stimulus presented.
-}
 
 \subsection{Display}{
 Present a circle of radius \code{stim$size} and color \code{stim$color}
@@ -248,8 +237,18 @@ DETAILS HERE
 If the chosen OPI implementation is \code{KowaAP7000}, then \code{nextStim}
 is ignored.
 }
+}
+\section{Compass}{
+\code{opiPresent(stim, nextStim=NULL)}
 
-\subsection{Octopus600}{
+If the chosen OPI implementation is \code{Compass}, then \code{nextStim}
+is ignored. Note that the dB level is rounded to the nearest integer.
+
+If tracking is on, then this will block until the tracking is obtained,
+and the stimulus presented.
+}
+
+\section{Octopus600}{
 \code{opiPresent(stim, nextStim=NULL)}
 
 If the chosen OPI implementation is \code{Octopus600}, then nextStim is
@@ -258,7 +257,7 @@ answer codes describing patient state may arise (see \code{answer} field
 in the Value section).
 }
 
-\subsection{Octopus900F310}{
+\section{Octopus900F310}{
 \code{opiPresent(stim, nextStim=NULL)}
 
 This functions as for the Octopus900, but responses are taken from the F310
@@ -271,12 +270,12 @@ If the R button is pressed, \code{seen} is set to 2.
 If no button is pressed within \code{responseWindow}, then \code{seen} is set to 0.
 }
 
-\subsection{PhoneHMD}{
+\section{PhoneHMD}{
 If the chosen OPI implementation is \code{PhoneHMD}, then \code{nextStim}
 is ignored. PhonVR
 }
 
-\subsection{SimGaussian}{
+\section{SimGaussian}{
 \code{opiPresent(stim, nextStim=NULL, fpr=0.03, fnr=0.01, tt=30)}
 
 If the chosen OPI implementation is \code{SimGaussian}, then the response
@@ -287,7 +286,7 @@ is the stimulus value in Humphrey dB, and \code{simG.global.sd} is
 set with \code{opiInitialize}.
 }
 
-\subsection{SimHenson}{
+\section{SimHenson}{
 \code{opiPresent(stim, nextStim=NULL, fpr=0.03, fnr=0.01, tt=30)}
 
 If the chosen OPI implementation is \code{SimHenson}, then the response to a
@@ -339,7 +338,7 @@ and multiplied by \code{rt_scale}.That is:
 \code{rgamma(1, shape=rt_shape, rate=rt_rate) / rt_scale}.
 }
 
-\subsection{SimHensonRT}{
+\section{SimHensonRT}{
 \code{opiPresent(stim, nextStim=NULL, fpr=0.03, fnr=0.01, tt=30, dist=stim$level - tt)}
 
 For static stimuli, this function is the same as for \code{SimHenson}, but
@@ -351,8 +350,7 @@ difference between the stimulus level and the true threshold, but you might
 want it scaled somehow to match \code{rtData}.
 }
 
-\subsection{SimNo}{
-
+\section{SimNo}{
 \code{opiPresent(stim, nextStim=NULL)}
 
 If the chosen OPI implementation is \code{SimNo}, then the response to a
@@ -360,14 +358,14 @@ stimuli is always no, hence \code{\link{opiPresent}} always returns
 \code{err=NULL}, \code{seen=FALSE}, and \code{time=0}.
 }
 
-\subsection{SimYes}{
+\section{SimYes}{
 \code{opiPresent(stim, nextStim=NULL)}
 
 If the chosen OPI implementation is \code{SimYes}, then the response to a
 stimuli is always yes, hence \code{\link{opiPresent}} always returns
 \code{err=NULL}, \code{seen=TRUE}, and \code{time=0}.
 }
-}
+
 \examples{
 \dontrun{
 # Display a spot
