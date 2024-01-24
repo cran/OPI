@@ -1,9 +1,9 @@
-e75fc4b420136e383f96ea4caf357c63 *DESCRIPTION
-18d47529558b27bc966df0ade0ad8171 *NAMESPACE
-ddd7f51bbb00f9b59814c4b4dd3386e4 *NEWS.md
+d7eb1bac940b595984482bf7cda3d0cf *DESCRIPTION
+7565edc73c4cb21ab46c0c0d2ed39e1d *NAMESPACE
+5fb3f00466b4a64021b3022f91bb7e43 *NEWS.md
 54d239e7c004d5f4638afc93f0b19b01 *R/OPI-package.r
 9e0c0c533c28992d8d8612b694bf39ad *R/QUESTP.r
-ec81922a0d4f0c8ebbc0d09d3aa0d60a *R/compassClient.r
+78066553bad7f3be3a5fb574eef4282d *R/compassClient.r
 762168fb89ffb1cd0adbbada05a56191 *R/data-RtDbUnits.r
 6eb6c05e475065fd0251910b80422030 *R/data-RtSigmaUnits.r
 d73ce4b59aac0a92a3597217b3101f36 *R/daydreamClient.r
@@ -48,7 +48,7 @@ e6922791c5b497344de150b44e7317c2 *man/degTopix.Rd
 a6e27b9d1617a5e1c4e0f8860a8e96a9 *man/opiClose.Rd
 ff6b3d1b8c5eaedb207d624bef8fecd1 *man/opiDistributor.Rd
 16a5a1a8f6f34db3022d1c0019c81838 *man/opiGetParams.Rd
-f62b51df856a021e58419cce7a6f2d54 *man/opiInitialize.Rd
+772ce3f9d2d5460f8f7e83cb96e6389a *man/opiInitialize.Rd
 caa3dd156f1d9329d9dab8de5dac4d53 *man/opiKineticStimulus.Rd
 64751a2ee1ca41ef64022d06fe57a563 *man/opiPresent.Rd
 d20e9040ca7ed6455f2513f416c64241 *man/opiQueryDevice.Rd
