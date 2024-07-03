@@ -26,8 +26,6 @@
 # limitations under the License.
 #
 #
-require(stats)
-require(utils)
 
 ##########################
 # little helper functions
@@ -142,7 +140,7 @@ ZEST.entropy <- function(state) {
 #' @seealso \code{\link{dbTocd}}, \code{\link{opiPresent}}
 #' @examples
 #' chooseOpi("SimHenson")
-#' if(!is.null(opiInitialize(type="C", cap=6)))
+#' if(!is.null(opiInitialize(type="C", cap=6)$err))
 #'   stop("opiInitialize failed")
 #'
 #' ##############################################
@@ -210,7 +208,7 @@ ZEST.entropy <- function(state) {
 #'   #cat(sprintf("has threshold %4.2f\n", finals[[i]]))
 #' }
 #'
-#' if (!is.null(opiClose()))
+#' if (!is.null(opiClose()$err))
 #'   warning("opiClose() failed")
 #' @export
 ZEST <- function(domain = 0:40, prior = rep(1 / length(domain),length(domain)),
@@ -319,13 +317,18 @@ ZEST.start <- function(domain = 0:40, prior = rep(1 / length(domain),length(doma
 #' @param nextStim A valid object for \code{opiPresent} to use as its \code{nextStim}.
 #' @param fixedStimValue A number in \code{state$domain} that, is \code{!is.na}, will be used as the stimulus value
 #'                       overriding \code{state$minStimulus}, \code{state$maxStimulus} and \code{state$stimChoice}.
+#' @param fixedResponse Ignored if \code{!is.na} otherwise used as the response to the stim shown.
+#'
+#' @return A list containing
+#'     * \code{state} The new state after presenting a stimuli and getting a response.
+#'     * \code{resp} The return from the \code{opiPresent} call that was made.
 #' @export
-ZEST.step <- function(state, nextStim = NULL, fixedStimValue = NA) {
+ZEST.step <- function(state, nextStim = NULL, fixedStimValue = NA, fixedResponse = NA) {
     if (!is.na(fixedStimValue)) {
         if (fixedStimValue %in% state$domain) {
             stim <- fixedStimValue
         } else {
-            stop(paste("ZEST.step: fixedStimValue = ", fixedStimValue,"is not in 'domain'."))
+            stop(paste("ZEST.step: fixedStimValue =", fixedStimValue, "is not in 'domain'."))
         }
     } else {
         if (state$stimChoice == "mean") {
@@ -335,7 +338,7 @@ ZEST.step <- function(state, nextStim = NULL, fixedStimValue = NA) {
         } else if (state$stimChoice == "median") {
             stimIndex <- which.min(abs(cumsum(state$pdf) - 0.5))
         } else {
-            stop(paste("ZEST.step: stimChoice = ",state$stimChoice," not implemented."))
+            stop(paste("ZEST.step: stimChoice =", state$stimChoice, "not implemented."))
         }
 
         stim <- state$domain[stimIndex]
@@ -343,18 +346,22 @@ ZEST.step <- function(state, nextStim = NULL, fixedStimValue = NA) {
         if (stim < state$minStimulus)
             stim <- state$minStimulus
 
-        if (stim > state$maxStimulus) 
+        if (stim > state$maxStimulus)
             stim <- state$maxStimulus
     }
     stimIndex <- which(stim == state$domain) # in case it changed via fixed, min or max
 
-    params <- c(list(stim = state$makeStim(stim, state$numPresentations), nextStim = nextStim), state$opiParams)
-    opiResp <- do.call(opiPresent, params)
-    if (!is.null(opiResp$err))
-        return(list(state = state, resp = opiResp))
+    if (is.na(fixedResponse)) {
+        params <- c(list(stim = state$makeStim(stim, state$numPresentations), nextStim = nextStim), state$opiParams)
+        opiResp <- do.call(opiPresent, params)
+        if (!is.null(opiResp$err))
+            return(list(state = state, resp = opiResp))
+    } else {
+        opiResp <- list(seen = fixedResponse, time = 0, err = NULL)
+    }
 
     fixation_is_good <- TRUE
-    if (!is.null(params$stim$checkFixationOK)) {
+    if (is.na(fixedResponse) && !is.null(params$stim$checkFixationOK)) {
         fixation_is_good <- params$stim$checkFixationOK(opiResp)
     }
 

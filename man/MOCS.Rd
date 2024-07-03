@@ -22,10 +22,10 @@ MOCS(
 \arguments{
 \item{params}{A matrix where each row is \code{x y i n correct_n ll1 ll2 ... llm} where
 \itemize{
-\item \code{x} is X coordinate of location.
-\item \code{y} is Y coordinate of location.
-\item \code{i} is a location number (assigned by caller).
-\item \code{n} is Number of times this location/luminance(s) should be repeated.
+\item \code{x} is X coordinate of location
+\item \code{y} is Y coordinate of location
+\item \code{i} is a location number (assigned by caller)
+\item \code{n} is Number of times this location/luminance(s) should be repeated
 \item \code{correct_n} is the index i of the luminance level (\code{lli}) that
 should be treated as a ``correct'' response (the correct interval). For a
 standard MOCS, this will be 1; for a 2AFC, this will be 1 or 2. This number will
@@ -44,7 +44,7 @@ two lli's, and \code{params} will have 6 columns.
 
 \item{responseWindowMeth}{Control time perimeter waits for response.
 \itemize{
-\item \code{"speed"} After an average of the last \code{speedHistory} response times, with a minimum of \code{responseFloor}. Initially \code{responseFloor}.
+\item \code{"speed"} After an average of the last \code{speedHistory} response times, with a minimum of \code{responseFloor}. Initially #'       \code{responseFloor}.
 \item \code{"constant"} Always use \code{responseFloor}.
 \item \code{"forceKey"} Wait for a keyboard input.
 }}
@@ -55,7 +55,7 @@ two lli's, and \code{params} will have 6 columns.
 (only used if \code{responseWindowMeth} is \code{"speed"}).}
 
 \item{keyHandler}{Function to get a keyboard input and returns as for \code{opiPresent}:
-\code{list(err=\{NULL|msg\}, seen=\{TRUE|FALSE\}, time}. The parameters passed to
+\code{err}, \code{seen} and \code{time}. The parameters passed to
 the function are the correct interval number (column 4 of \code{params}), and the
 result of \code{opiPresent}. See Examples.}
 

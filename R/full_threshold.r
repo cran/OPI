@@ -36,7 +36,7 @@
 # limitations under the License.
 #
 
-#' @rdname FT
+#' @rdname full_threshold
 #' @title Full Threshold
 #' @description FT begins with a 4-2dB staircase beginning at level
 #' \code{est}. If the final estimate (last seen) is more than 4dB away
@@ -58,7 +58,7 @@
 #' found with the first staircase.
 #'
 #' Note this function will repeatedly call \code{opiPresent} for a stimulus
-#' until \code{opiPresent} returns \code{NULL} (ie no error occured)
+#' until \code{opiPresent} returns \code{NULL} (ie no error occurred)
 #'
 #' If more than one FT is to be interleaved (for example, testing multiple
 #' locations), then the \code{FT.start}, \code{FT.step}, \code{FT.stop}
@@ -67,59 +67,59 @@
 #' the simpler \code{FT} can be used. See examples below
 #' @return
 #' ## Single location
-#'   Returns a list containing
-#'     * \code{npres}, total number of presentations.
-#'     * \code{respSeq}, response sequence stored as a list of (seen,dB) pairs.
-#'     * \code{first}, first staircase estimate in dB.
-#'     * \code{final}, final threshold estimate in dB.
-#' 
-#' ## Multilple locations
-#'   \code{FT.start} returns a list that can be passed to \code{FT.step},
+#' Returns a list containing
+#'  * \code{npres} Total number of presentations
+#'  * \code{respSeq} Response sequence stored as a list of (seen,dB) pairs
+#'  * \code{first} First staircase estimate in dB
+#'  * \code{final} Final threshold estimate in dB
+#'
+#' ## Multiple locations
+#' \code{FT.start} returns a list that can be passed to \code{FT.step},
 #'   \code{FT.stop}, and \code{FT.final}. It represents the state of a FT
 #'     at a single location at a point in time and contains the following.
-#'     * \code{name}, \code{FT}.
-#'     * \code{startingEstimate=est}, input param.
-#'     * \code{currentLevel}, the next stimulus to present.
-#'     * \code{minStimulus=instRange[1]}, input param.
-#'     * \code{maxStimulus=instRange[2]}, input param.
-#'     * \code{makeStim}, input param.
-#'     * \code{lastSeen}, the last seen stimulus.
-#'     * \code{lastResponse}, the last response given.
-#'     * \code{stairResult}, The final result if finished (initially \code{NA}).
-#'     * \code{finished}, \code{"Not"} if staircase has not finished, or one of 
-#'                      \code{"Rev"} (finished due to 2 reversals), 
-#'                      \code{"Max"} (finished due to 2 \code{maxStimulus} seen), 
-#'                      \code{"Min"} (finished due to 2 \code{minStimulus} not seen).
-#'     * \code{verbose}, number of reversals so far.
-#'     * \code{numberOfReversals}, number of reversals so far.
-#'     * \code{currSeenLimit}, number of times \code{maxStimulus} has been seen.
-#'     * \code{currNotSeenLimit}, number of times \code{minStimulus} not seen.
-#'     * \code{numPresentations}, number of presentations so far.
-#'     * \code{stimuli}, vector of stimuli shown at each call to \code{FT.step}.
-#'     * \code{responses}, vector of responses received (1 seen, 0 not) received at each call to \code{FT.step}.
-#'     * \code{responseTimes}, vector of response times received at each call to \code{FT.step}.
-#'     * \code{opiParams=list(...)}, input param
-#'     * \code{finished}, \code{TRUE} if staircase has finished (2 reversals, or max/min seen/not-seen twice).
-#' 
+#'  * \code{name} \code{FT}
+#'  * A copy of all of the parameters supplied to FT.start:
+#'        \code{startingEstimate=est}, \code{minStimulus=instRange[1]},
+#'        \code{maxStimulus=instRange[2]}, \code{makeStim}, and \code{opiParams=list(...)}.
+#'  * \code{currentLevel} The next stimulus to present.
+#'  * \code{lastSeen} The last seen stimulus.
+#'  * \code{lastResponse} The last response given.
+#'  * \code{firstStairResult} The result of the first staircase (initially \code{NA}).
+#'  * \code{secondStairResult} The result of the first staircase (initially \code{NA},
+#'        and could remain \code{NA}).
+#'  * \code{finished} \code{TRUE} if staircase has finished (2 reversals, or max/min
+#'        seen/not-seen twice).
+#'  * \code{numberOfReversals} Number of reversals so far.
+#'  * \code{currSeenLimit} Number of times \code{maxStimulus} has been seen.
+#'  * \code{currNotSeenLimit} Number of times \code{minStimulus} not seen.
+#'  * \code{numPresentations} Number of presentations so far.
+#'  * \code{stimuli} Vector of stimuli shown at each call to \code{FT.step}.
+#'  * \code{responses} Vector of responses received (1 seen, 0 not) received at each
+#'        call to \code{FT.step}.
+#'  * \code{responseTimes} Vector of response times received at each call to\code{FT.step}.
+#'
 #' \code{FT.step} returns a list containing
-#'   * \code{state}, the new state after presenting a stimuli and getting a response.
-#'   * \code{resp}, the return from the \code{opiPresent} call that was made.
-#' 
+#'  * \code{state} The new state after presenting a stimuli and getting a response.
+#'  * \code{resp} The return from the \code{opiPresent} call that was made.
+#'
 #' \code{FT.stop} returns \code{TRUE} if the first staircase has had 2 reversals, or
 #' \code{maxStimulus} is seen twice or \code{minStimulus} is not seen twice and the
 #'   final estimate is within 4 dB of the starting stimulus. Returns \code{TRUE} if
 #'   the second staircase has had 2 reversals, or \code{maxStimulus} is seen twice or
-#'   \code{minStimulus} is not seen twice
+#' \code{minStimulus} is not seen twice
 #'
 #' \code{FT.final} returns the final estimate of threshold based on state, which is
 #'   the last seen in the second staircase, if it ran, or the first staircase otherwise
 #'
 #' \code{FT.final.details} returns a list containing
-#'   * \code{final}, the final threshold.
-#'   * \code{first}, the threshold determined by the first staircase (might be different from final).
-#'   * \code{stopReason}, either \code{Reversals}, \code{Max}, or \code{Min} which are the three ways in which FT can terminate.
-#'   * \code{np}, number of presentation for the whole procedure (including both staircases if run).
-#' 
+#'  * \code{final} The final threshold.
+#'  * \code{first} The threshold determined by the first staircase (might be
+#'     different from final).
+#'  * \code{stopReason} Either \code{Reversals}, \code{Max}, or \code{Min} which
+#'     are the three ways in which FT can terminate.
+#'  * \code{np} Number of presentation for the whole procedure (including both
+#'     staircases if run).
+#'
 #' @references
 #' A. Turpin, P.H. Artes and A.M. McKendrick. "The Open Perimetry
 #' Interface: An enabling tool for clinical visual psychophysics", Journal
@@ -130,7 +130,7 @@
 #'
 #' C.A. Johnson, B.C. Chauhan, and L.R. Shapiro. "Properties of staircase
 #' procedures for estimating thresholds in automated perimetry",
-#' Investagative Ophthalmology and Vision Science 33 1993.
+#' Investigative Ophthalmology and Vision Science 33 1993.
 #' @seealso \code{\link{dbTocd}}, \code{\link{opiPresent}}, \code{\link{fourTwo.start}}
 #' @examples
 #' # Stimulus is Size III white-on-white as in the HFA
@@ -141,11 +141,11 @@
 #'   return(s)
 #' }
 #' chooseOpi("SimHenson")
-#' if (!is.null(opiInitialize(type="C", cap=6)))
+#' if (!is.null(opiInitialize(type="C", cap=6)$err))
 #'   stop("opiInitialize failed")
 #'
 #' result <- FT(makeStim=makeStim, tt=30, fpr=0.15, fnr=0.01)
-#' if (!is.null(opiClose()))
+#' if (!is.null(opiClose()$err))
 #'   warning("opiClose() failed")
 #'
 #' ##############################################
@@ -183,7 +183,7 @@
 #'   cat(sprintf("has threshold %4.2f\n", finals[[i]]))
 #' }
 #'
-#' if(!is.null(opiClose()))
+#' if(!is.null(opiClose()$err))
 #'   warning("opiClose() failed")
 #' @export
 FT <- function(est=25, instRange=c(0,40), verbose=FALSE, makeStim, ...) {
@@ -266,13 +266,13 @@ FT <- function(est=25, instRange=c(0,40), verbose=FALSE, makeStim, ...) {
 
     return(list(
         npres=length(fullResponseSeq),  # number of presentations
-        respSeq=fullResponseSeq,        # reposnse sequence (list of pairs)
+        respSeq=fullResponseSeq,        # reposes sequence (list of pairs)
         first=first$final,              # estimate from first staircase
         final=final                     # final threshold estimate
     ))
 }#FT()
 
-#' @rdname FT
+#' @rdname full_threshold
 #' @export
 FT.start <- function(est=25, instRange=c(0,40), makeStim, ...) {
     if (est < instRange[1] || est > instRange[2])
@@ -300,7 +300,7 @@ FT.start <- function(est=25, instRange=c(0,40), makeStim, ...) {
     ))
 }# FT.start()
 
-#' @rdname FT
+#' @rdname full_threshold
 #' @param state Current state of the FT returned by \code{FT.start} and
 #' \code{FT.step}
 #' @param nextStim A valid object for \code{opiPresent} to use as its
@@ -370,7 +370,7 @@ FT.step <- function(state, nextStim=NULL) {
     return(list(state=state, resp=opiResp))
 }#FT.step()
 
-#' @rdname FT
+#' @rdname full_threshold
 #' @export
 FT.stop <- function(state) { return(state$finished) }
 
@@ -394,7 +394,7 @@ FT.final.details <- function(state) {
     ))
 }
 
-#' @rdname FT
+#' @rdname full_threshold
 #' @export
 FT.final <- function(state) {
     return (FT.final.details(state)[["final"]])
