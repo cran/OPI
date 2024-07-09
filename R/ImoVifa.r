@@ -208,7 +208,12 @@ opiSetup_for_ImoVifa <- function(settings) {
 #'
 #' @return A list containing:
 #'  * \code{err} \code{NULL} if there was no error, a string message if there is an error.
-#'
+#'  * \code{rightEyex} x co-ordinates of right pupil (pixels from image centre, left < 0)
+#'  * \code{rightEyey} y co-ordinates of right pupil (pixels from image centre, up > 0)
+#'  * \code{leftEyex} x co-ordinates of left pupil (pixels from image centre, left < 0)
+#'  * \code{leftEyey} y co-ordinates of left pupil (pixels from image centre, up > 0)
+#'  * \code{leftEyed} Diameter of left pupil (pixels)
+#'  * \code{rightEyed} Diameter of right pupil (pixels)
 
 #'
 #'
@@ -307,18 +312,21 @@ opiQueryDevice_for_ImoVifa <- function() {
 #'
 #' @return A list containing:
 #'  * \code{err} \code{NULL} if there was no error, a string message if there is an error.
-#'  * \code{eyedStart} Diameter of pupil at stimulus onset (mm).
-#'  * \code{eyexEnd} x co-ordinate of pupil at button press (degrees from image
-#'                   centre). Note that for multi-part stimuli (t=0), the eye
-#'                   taken is the last eye in the list of components.
-#'  * \code{eyeyEnd} y co-ordinate (degrees). See eyexEnd for more details.
-#'  * \code{eyedEnd} Diameter of pupil at button press or response window expiry (mm).
-#'  * \code{eyexStart} x co-ordinates of pupil at stimulus onset (degrees from
-#'                     image centre). For a multi-part stimulus (t=0), the eye
-#'                     taken is the first eye in the list of components.
+#'  * \code{eyedStart} Diameter of pupil at stimulus onset (pixels).
+#'  * \code{eyexEnd} x co-ordinate of pupil at button press (pixels from image
+#'                   centre. Image is 640x480, left < 0). Note that for
+#'                   multi-part stimuli (t=0), the eye taken is the *last* eye
+#'                   in the list of components.
+#'  * \code{eyeyEnd} y co-ordinate (pixels). See eyexEnd for more details. (up > 0)
+#'  * \code{eyedEnd} Diameter of pupil at button press or response window expiry (pixels).
+#'  * \code{eyexStart} x co-ordinates of pupil at stimulus onset (pixels from
+#'                     image centre. Image is 640x480, left < 0). For a
+#'                     multi-part stimulus (t=0), the eye taken is the *first*
+#'                     eye in the list of components.
 #'  * \code{time} Response time from stimulus onset if button pressed (ms).
 #'  * \code{seen} '1' if seen, '0' if not.
-#'  * \code{eyeyStart} y co-ordinates (degrees from image centre). See eyexStart for more details.
+#'  * \code{eyeyStart} y co-ordinates (pixels from image centre). See eyexStart
+#'                     for more details. (up > 0)
 
 #'
 #' @details

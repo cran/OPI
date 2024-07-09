@@ -1,9 +1,9 @@
-42ca4ee727d0efc53231d1b0ba7a7b73 *DESCRIPTION
+4e202ea69303d7a5dc08a5ea1c1e37c7 *DESCRIPTION
 7cc2cf378d067f0d2fa4e3003f0b1ecc *NAMESPACE
-47b0dc9af4fc5ed413df06c190939699 *NEWS.md
+f40ef4b31851abdf37d6860be5205d35 *NEWS.md
 d831d81b59efed99f409d9cf84564809 *R/Compass.r
 dc9615009859114acd02e3a2308a4c04 *R/Display.r
-5d8a53e99a5ae6489de6b3dcea8f8a53 *R/ImoVifa.r
+2a36ec601d6bb3215a2d1a6abb76503c *R/ImoVifa.r
 e03d377807e89b1055fc4da8c7bc6106 *R/KTPsi.r
 f0a730ae2cabe0e075945cc2de5e3a7e *R/KowaAP7000Client.r
 df6cc46bc7fae1a55b713f3d5065b35a *R/OPI-package.r
@@ -82,7 +82,7 @@ a25163125ce5ceb6ba1c0ecdee82d804 *man/opiInitialise_for_SimYes.Rd
 024e0a3728b7cbb1f750a56241f52031 *man/opiPresent.Rd
 3d1a195e5f9f6409ade7265e53bc0f7d *man/opiPresent_for_Compass.Rd
 14c35c53fae6220e1e35098dc7ecccd7 *man/opiPresent_for_Display.Rd
-e7287a95b7e90ca8e9bad1b3217584ad *man/opiPresent_for_ImoVifa.Rd
+f644aa131e82411869061560f82a6a3d *man/opiPresent_for_ImoVifa.Rd
 90c02d4843e40145621f7cdacf4691a2 *man/opiPresent_for_KowaAP7000.Rd
 a92c189ef2aad864fd685ea3f5457342 *man/opiPresent_for_O600.Rd
 1bd771bbe27dcd8d39e59135863d1707 *man/opiPresent_for_Octopus900.Rd
@@ -96,7 +96,7 @@ b59a0a02a8998d75c1cc0f476b7ac224 *man/opiPresent_for_SimYes.Rd
 6988d3a508ede7bb574187e5c21eef81 *man/opiQueryDevice.Rd
 032411b1465c488ef248497412c541c9 *man/opiQueryDevice_for_Compass.Rd
 f38d11c3614a6186eeb1a54923f205ce *man/opiQueryDevice_for_Display.Rd
-feb99d5935b166bd28a08fd531e425a9 *man/opiQueryDevice_for_ImoVifa.Rd
+c7fd2d0002378b9cf88f31ed58b31dc4 *man/opiQueryDevice_for_ImoVifa.Rd
 a19de50f0e513c4589f909fe87674b55 *man/opiQueryDevice_for_KowaAP7000.Rd
 6a9cbb4aa161d311c873ae208e82cb48 *man/opiQueryDevice_for_O600.Rd
 8a3a84fecc086233fe227ac9c50df940 *man/opiQueryDevice_for_Octopus900.Rd
