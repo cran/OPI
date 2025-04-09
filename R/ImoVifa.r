@@ -43,8 +43,10 @@ if (exists(".opi_env") && !exists("ImoVifa", where = .opi_env))
 #' \code{port} can take on values in the range \code{[0, 65535]}.
 #'
 #' @examples
+#' \dontrun{
 #' chooseOpi("ImoVifa")
 #' result <- opiInitialise(address = list(port = 50001, ip = "localhost"))
+#' }
 #'
 #' @seealso [opiInitialise()]
 #'
@@ -156,9 +158,11 @@ opiInitialise_for_ImoVifa <- function(address) {
 #' \code{fixRotation} can take on values in the range \code{[0.0, 360.0]}.
 #'
 #' @examples
+#' \dontrun{
 #' chooseOpi("ImoVifa")
 #' opiInitialise(list(port = 50001, ip = "localhost"))
 #' result <- opiSetup(settings = list(eye = "BOTH"))
+#' }
 #'
 #' @seealso [opiSetup()]
 #'
@@ -219,10 +223,12 @@ opiSetup_for_ImoVifa <- function(settings) {
 #'
 #'
 #' @examples
+#' \dontrun{
 #' chooseOpi("ImoVifa")
 #' opiInitialise(list(port = 50001, ip = "localhost"))
 #' opiSetup(list(eye = "BOTH"))
 #' result <- opiQueryDevice()
+#' }
 #'
 #' @seealso [opiQueryDevice()]
 #'
@@ -316,9 +322,11 @@ opiQueryDevice_for_ImoVifa <- function() {
 #'  * \code{eyexEnd} x co-ordinate of pupil at button press (pixels from image
 #'                   centre. Image is 640x480, left < 0). Note that for
 #'                   multi-part stimuli (t=0), the eye taken is the *last* eye
-#'                   in the list of components.
-#'  * \code{eyeyEnd} y co-ordinate (pixels). See eyexEnd for more details. (up > 0)
-#'  * \code{eyedEnd} Diameter of pupil at button press or response window expiry (pixels).
+#'                   in the list of components. Not valid for not-seen response.
+#'  * \code{eyeyEnd} y co-ordinate (pixels). See eyexEnd for more details. (up >
+#'                   0). Not valid for not-seen response.
+#'  * \code{eyedEnd} Diameter of pupil at button press or response window expiry
+#'                   (pixels). Not valid for not-seen response.
 #'  * \code{eyexStart} x co-ordinates of pupil at stimulus onset (pixels from
 #'                     image centre. Image is 640x480, left < 0). For a
 #'                     multi-part stimulus (t=0), the eye taken is the *first*
@@ -398,12 +406,14 @@ opiQueryDevice_for_ImoVifa <- function() {
 #'                      "u", "v", "w", "x", "y", "z"}}.
 #'
 #' @examples
+#' \dontrun{
 #' chooseOpi("ImoVifa")
 #' opiInitialise(list(port = 50001, ip = "localhost"))
 #' opiSetup(list(eye = "BOTH"))
 #' result <- opiPresent(stim = list(lum = list(300.0), stim.length = 1, color1 = list(list(1.0,
 #'                   1.0, 1.0)), sx = list(1.72), sy = list(1.72),
 #'                   eye = list("LEFT"), t = list(200.0), w = 1500.0, x = list(0.0), y = list(0.0)))
+#' }
 #'
 #' @seealso [opiPresent()]
 #'
@@ -459,10 +469,12 @@ opiPresent_for_ImoVifa <- function(stim, ...) {
 #'
 #'
 #' @examples
+#' \dontrun{
 #' chooseOpi("ImoVifa")
 #' opiInitialise(list(port = 50001, ip = "localhost"))
 #' opiSetup(list(eye = "BOTH"))
 #' result <- opiClose()
+#' }
 #'
 #' @seealso [opiClose()]
 #'

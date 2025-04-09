@@ -1,8 +1,8 @@
 Package: OPI
 Type: Package
 Title: Open Perimetry Interface
-Version: 3.0.2
-Date: 2024-07-08
+Version: 3.0.4
+Date: 2025-04-09
 Authors@R: c(
     person("Andrew", "Turpin", email="andrew.turpin@lei.org.au", comment = c("ORCID: 0000-0003-2559-8769"), role=c("cre","aut","cph")),
     person("David", "Lawson",role=c("ctb","cph")),
@@ -23,11 +23,11 @@ Collate: opi.r Display.r PicoVR.r PhoneHMD.r ImoVifa.r dbTocd.r
         SimHenson.r SimGaussian.r zest.r mocs.r fourTwo.r
         full_threshold.r pix2deg.r QUESTP.r KTPsi.r Compass.r
         Octopus900.r Octopus600.r OPI-package.r SimHensonRT.r
-        KowaAP7000Client.r
+        KowaAP7000Client.r MAIA.r
 Suggests: testthat (>= 3.0.0)
 Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2024-07-08 03:30:29 UTC; aturpin
+Packaged: 2025-04-09 09:29:24 UTC; aturpin
 Author: Andrew Turpin [cre, aut, cph] (ORCID: 0000-0003-2559-8769),
   David Lawson [ctb, cph],
   Ivan Marin-Franch [ctb, cph],
@@ -37,4 +37,4 @@ Author: Andrew Turpin [cre, aut, cph] (ORCID: 0000-0003-2559-8769),
   Giovanni Montesano [ctb]
 Maintainer: Andrew Turpin <andrew.turpin@lei.org.au>
 Repository: CRAN
-Date/Publication: 2024-07-09 15:00:14 UTC
+Date/Publication: 2025-04-09 11:30:10 UTC

@@ -164,3 +164,11 @@
 
 ## OPI 3.0.2 
   * Changed eye tracking for ImoVifa/Tempo to return pixels, not degrees and mm.
+
+## OPI 3.0.3 
+  * Added MAIA perimeter
+
+## OPI 3.0.4
+  * Add stricter check for opiInitialise being called.
+  * Made sure SimHensonRT works and a couple of examples.
+  * \dontrun JOVP examples
