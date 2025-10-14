@@ -172,3 +172,6 @@
   * Add stricter check for opiInitialise being called.
   * Made sure SimHensonRT works and a couple of examples.
   * \dontrun JOVP examples
+
+## OPI 3.0.5
+  * Fixed bug where initialise was not recorded internally in some machines

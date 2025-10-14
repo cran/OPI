@@ -103,6 +103,8 @@ opiInitialise_for_MAIA <- function(ip = "192.168.1.2", port = 5555, ...) {
 
     assign("socket", socket, envir = .opi_env$MAIA)
 
+    assign("machine_is_initialised", TRUE, .opi_env)
+
     return(err = NULL)
 }
 

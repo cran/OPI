@@ -86,6 +86,8 @@ opiInitialise_for_Display <- function(address) {
             opiRes <- res$msg
         else
             opiRes <- list(msg = res$msg)
+
+        assign("machine_is_initialised", TRUE, .opi_env)
     }
     return(opiRes)
 }
