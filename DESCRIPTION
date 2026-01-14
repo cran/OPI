@@ -1,8 +1,8 @@
 Package: OPI
 Type: Package
 Title: Open Perimetry Interface
-Version: 3.0.5
-Date: 2025-10-14
+Version: 3.0.6
+Date: 2026-01-14
 Authors@R: c(
     person("Andrew", "Turpin", email="andrew.turpin@lei.org.au", comment = c("ORCID: 0000-0003-2559-8769"), role=c("cre","aut","cph")),
     person("David", "Lawson",role=c("ctb","cph")),
@@ -27,7 +27,7 @@ Collate: opi.r Display.r PicoVR.r PhoneHMD.r ImoVifa.r dbTocd.r
 Suggests: testthat (>= 3.0.0)
 Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2025-10-14 03:25:25 UTC; aturpin
+Packaged: 2026-01-14 01:44:35 UTC; aturpin
 Author: Andrew Turpin [cre, aut, cph] (ORCID: 0000-0003-2559-8769),
   David Lawson [ctb, cph],
   Ivan Marin-Franch [ctb, cph],
@@ -37,4 +37,4 @@ Author: Andrew Turpin [cre, aut, cph] (ORCID: 0000-0003-2559-8769),
   Giovanni Montesano [ctb]
 Maintainer: Andrew Turpin <andrew.turpin@lei.org.au>
 Repository: CRAN
-Date/Publication: 2025-10-14 04:50:02 UTC
+Date/Publication: 2026-01-14 06:10:57 UTC

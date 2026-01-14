@@ -1,6 +1,6 @@
-fb1face2dd234a89407d355326057027 *DESCRIPTION
+d7551d40067650a9d1e2ecc327250de0 *DESCRIPTION
 7cc2cf378d067f0d2fa4e3003f0b1ecc *NAMESPACE
-c0408c2a53618b2622ed7f06ee828b12 *NEWS.md
+d903925ce27249873d71762abafdbe8d *NEWS.md
 d8546f95f2badeb9d11ce2610e9c4252 *R/Compass.r
 86e0ac4ade2a20f1645bcbd733c6ec6e *R/Display.r
 2b654bf9b68063a92801043186e15a58 *R/ImoVifa.r
@@ -134,6 +134,6 @@ f0f4e6ef3b7fea950d5f3df3f3c41008 *man/opiTemporalStimulus.Rd
 962a9eea7dda597e1a09b948384a6a6e *tests/testthat.R
 1d53657af4080b67b9658af21878396a *tests/testthat/test-opiClose.r
 93cad4e586afaec6f2668fb892469f7e *tests/testthat/test-opiInitialise.r
-a76140592bc17e227868f688905be892 *tests/testthat/test-opiPresent.r
+a176aa18af49827f018bdb8b0198f198 *tests/testthat/test-opiPresent.r
 0cf096a3f315affd6657281ab18baefb *tests/testthat/test-opiQueryDevice.r
 cef64e72b102338600c0139a8fbafd52 *tests/testthat/test-opiSetup.r
